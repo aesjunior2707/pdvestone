@@ -15,12 +15,22 @@ export interface OrderItem {
   addedAt: Date
 }
 
+export interface PendingItem {
+  id: string
+  menuItem: MenuItem
+  quantity: number
+  observation: string
+  addedAt: Date
+}
+
 export interface Table {
   id: string
   number: number
   status: 'available' | 'occupied'
   items: OrderItem[]
+  pendingItems: PendingItem[]
   total: number
+  pendingTotal: number
 }
 
 export interface ClosedTable {
@@ -28,8 +38,11 @@ export interface ClosedTable {
   tableNumber: number
   items: OrderItem[]
   total: number
+  serviceCharge: number
+  finalTotal: number
   closedAt: Date
   waiter: string
+  paymentMethod: string
 }
 
 export const useRestaurantStore = defineStore('restaurant', {
@@ -48,7 +61,9 @@ export const useRestaurantStore = defineStore('restaurant', {
           number: i + 1,
           status: 'available' as const,
           items: [],
-          total: 0
+          pendingItems: [],
+          total: 0,
+          pendingTotal: 0
         }))
       }
     },
@@ -128,30 +143,84 @@ export const useRestaurantStore = defineStore('restaurant', {
       this.selectedTable = this.tables.find(t => t.id === tableId) || null
     },
 
-    addItemToTable(tableId: string, menuItemId: string, quantity: number, observation: string) {
+    addPendingItemToTable(tableId: string, menuItemId: string, quantity: number, observation: string) {
       const table = this.tables.find(t => t.id === tableId)
       const menuItem = this.menuItems.find(m => m.id === menuItemId)
 
       if (table && menuItem) {
-        const orderItem: OrderItem = {
-          id: `Ped-${Date.now()}-${Math.random()}`,
+        const pendingItem: PendingItem = {
+          id: `Pending-${Date.now()}-${Math.random()}`,
           menuItem,
           quantity,
           observation,
           addedAt: new Date()
         }
 
-        table.items.push(orderItem)
+        table.pendingItems.push(pendingItem)
+        this.updateTablePendingTotal(tableId)
+      }
+    },
+
+    removePendingItemFromTable(tableId: string, pendingItemId: string) {
+      const table = this.tables.find(t => t.id === tableId)
+      if (table) {
+        table.pendingItems = table.pendingItems.filter(item => item.id !== pendingItemId)
+        this.updateTablePendingTotal(tableId)
+      }
+    },
+
+    sendPendingItems(tableId: string) {
+      const table = this.tables.find(t => t.id === tableId)
+      if (table && table.pendingItems.length > 0) {
+        // Convert pending items to actual order items
+        const orderItems: OrderItem[] = table.pendingItems.map(pendingItem => ({
+          id: `Order-${Date.now()}-${Math.random()}`,
+          menuItem: pendingItem.menuItem,
+          quantity: pendingItem.quantity,
+          observation: pendingItem.observation,
+          addedAt: new Date()
+        }))
+
+        // Add to actual items
+        table.items.push(...orderItems)
         table.status = 'occupied'
+
+        // Print to kitchen
+        console.log('Sending to kitchen for Table', table.number, {
+          items: orderItems.map(item => ({
+            name: item.menuItem.name,
+            quantity: item.quantity,
+            observation: item.observation
+          }))
+        })
+
+        // Clear pending items
+        table.pendingItems = []
+        table.pendingTotal = 0
+
+        // Update totals
         this.updateTableTotal(tableId)
       }
+    },
+
+    clearPendingItems(tableId: string) {
+      const table = this.tables.find(t => t.id === tableId)
+      if (table) {
+        table.pendingItems = []
+        table.pendingTotal = 0
+      }
+    },
+
+    addItemToTable(tableId: string, menuItemId: string, quantity: number, observation: string) {
+      // This method now adds to pending items instead of directly to the table
+      this.addPendingItemToTable(tableId, menuItemId, quantity, observation)
     },
 
     removeItemFromTable(tableId: string, orderItemId: string) {
       const table = this.tables.find(t => t.id === tableId)
       if (table) {
         table.items = table.items.filter(item => item.id !== orderItemId)
-        if (table.items.length === 0) {
+        if (table.items.length === 0 && table.pendingItems.length === 0) {
           table.status = 'available'
         }
         this.updateTableTotal(tableId)
@@ -167,23 +236,40 @@ export const useRestaurantStore = defineStore('restaurant', {
       }
     },
 
-    closeTable(tableId: string, waiterName: string) {
+    updateTablePendingTotal(tableId: string) {
+      const table = this.tables.find(t => t.id === tableId)
+      if (table) {
+        table.pendingTotal = table.pendingItems.reduce((sum, item) =>
+          sum + (item.menuItem.price * item.quantity), 0
+        )
+      }
+    },
+
+    closeTable(tableId: string, waiterName: string, paymentMethod: string) {
       const table = this.tables.find(t => t.id === tableId)
       if (table && table.items.length > 0) {
+        const serviceCharge = table.total * 0.10
+        const finalTotal = table.total + serviceCharge
+        
         const closedTable: ClosedTable = {
           id: `closed-${Date.now()}`,
           tableNumber: table.number,
           items: [...table.items],
           total: table.total,
+          serviceCharge: serviceCharge,
+          finalTotal: finalTotal,
           closedAt: new Date(),
-          waiter: waiterName
+          waiter: waiterName,
+          paymentMethod: paymentMethod
         }
 
         this.closedTables.unshift(closedTable)
 
         // Reset table
         table.items = []
+        table.pendingItems = []
         table.total = 0
+        table.pendingTotal = 0
         table.status = 'available'
 
         if (this.selectedTable?.id === tableId) {

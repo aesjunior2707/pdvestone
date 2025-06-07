@@ -33,9 +33,41 @@
             </div>
           </div>
           
+          <!-- Subtotal -->
           <div class="flex justify-between items-center pt-3 mt-3 border-t border-gray-200">
-            <span class="text-lg font-semibold text-gray-900">Total</span>
-            <span class="text-lg font-semibold text-gray-900">R${{ table.total.toFixed(2) }}</span>
+            <span class="text-base font-medium text-gray-700">Subtotal</span>
+            <span class="text-base font-medium text-gray-700">R${{ table.total.toFixed(2) }}</span>
+          </div>
+          
+          <!-- Service Charge -->
+          <div class="flex justify-between items-center pt-2">
+            <span class="text-base font-medium text-gray-700">Taxa de serviço (10%)</span>
+            <span class="text-base font-medium text-gray-700">R${{ serviceCharge.toFixed(2) }}</span>
+          </div>
+          
+          <!-- Final Total -->
+          <div class="flex justify-between items-center pt-3 mt-3 border-t-2 border-gray-300">
+            <span class="text-lg font-bold text-gray-900">Total Final</span>
+            <span class="text-lg font-bold text-emerald-600">R${{ finalTotal.toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <!-- Payment Method Selection -->
+        <div class="mb-6">
+          <h4 class="font-medium text-gray-900 mb-3">Forma de pagamento</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <button
+              v-for="method in paymentMethods"
+              :key="method.value"
+              @click="selectedPaymentMethod = method.value"
+              class="p-3 border-2 rounded-lg text-center font-medium transition-all duration-200"
+              :class="selectedPaymentMethod === method.value 
+                ? 'border-emerald-500 bg-emerald-50 text-emerald-700' 
+                : 'border-gray-200 text-gray-700 hover:border-gray-300'"
+            >
+              <div class="text-lg mb-1">{{ method.icon }}</div>
+              <div class="text-sm">{{ method.label }}</div>
+            </button>
           </div>
         </div>
 
@@ -61,7 +93,8 @@
           </button>
           <button
             @click="handleClose"
-            class="flex-1 btn-primary"
+            :disabled="!selectedPaymentMethod"
+            class="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
            Fechar Mesa
           </button>
@@ -79,6 +112,14 @@ const props = defineProps(['table'])
 const emit = defineEmits(['close', 'confirm'])
 
 const printReceipt = ref(true)
+const selectedPaymentMethod = ref('')
+
+const paymentMethods = [
+  { value: 'pix', label: 'PIX', icon: '📱' },
+  { value: 'debit', label: 'Débito', icon: '💳' },
+  { value: 'credit', label: 'Crédito', icon: '💳' },
+  { value: 'cash', label: 'Dinheiro', icon: '💵' }
+]
 
 const groupedItems = computed(() => {
   const groups = new Map()
@@ -102,15 +143,29 @@ const groupedItems = computed(() => {
   return Array.from(groups.values())
 })
 
+const serviceCharge = computed(() => {
+  return props.table.total * 0.10
+})
+
+const finalTotal = computed(() => {
+  return props.table.total + serviceCharge.value
+})
+
 const handleClose = () => {
+  if (!selectedPaymentMethod.value) return
+  
   if (printReceipt.value) {
-    // Simulate printing receipt
-    console.log('Printing receipt for Table', props.table.number, {
+    // Simulate printing receipt with service charge and payment method
+    console.log('Printing final receipt for Table', props.table.number, {
       items: groupedItems.value,
-      total: props.table.total
+      subtotal: props.table.total,
+      serviceCharge: serviceCharge.value,
+      finalTotal: finalTotal.value,
+      paymentMethod: selectedPaymentMethod.value,
+      type: 'FINAL'
     })
   }
   
-  emit('confirm')
+  emit('confirm', selectedPaymentMethod.value)
 }
 </script>
