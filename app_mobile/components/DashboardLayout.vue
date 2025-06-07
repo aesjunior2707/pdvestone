@@ -19,7 +19,7 @@
             </button>
             
             <button
-              @click="authStore.logout()"
+              @click="handleLogout"
               class="p-2 text-gray-600 hover:text-red-600 transition-colors"
             >
               <LogOutIcon class="w-5 h-5" />
@@ -49,7 +49,17 @@ const restaurantStore = useRestaurantStore()
 const showHistory = ref(false)
 
 onMounted(() => {
+  // Initialize auth from localStorage
+  authStore.initializeAuth()
+  
+  // Initialize restaurant data
   restaurantStore.initializeTables()
   restaurantStore.initializeMenuItems()
 })
+
+const handleLogout = () => {
+  if (confirm('Tem certeza que deseja sair?')) {
+    authStore.logout()
+  }
+}
 </script>
