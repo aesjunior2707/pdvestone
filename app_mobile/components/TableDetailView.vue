@@ -27,14 +27,14 @@
           @click="printPartialReceipt"
           class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
         >
-          Imprimir Parcial
+          Imprimir Conta
         </button>
         <button
           v-if="table.items.length > 0"
           @click="showCloseTableModal = true"
           class="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors"
         >
-          Fechar Mesa
+          Receber Mesa
         </button>
       </div>
     </div>
