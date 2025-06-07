@@ -32,11 +32,7 @@
         </div>
         <button
           @click="clearFilter"
-<<<<<<< HEAD
           class="w-full mt-6 ml-5 px-4 py-2 text-sm text-white rounded-lg transition-colors"
-=======
-          class="mt-6 ml-1 px-4 py-2 text-sm text-white rounded-lg transition-colors"
->>>>>>> bacda74164eea3fa3530391690c05a3edb0836ab
           style="background-color: #EF5350;"
           onmouseover="this.style.backgroundColor='#E53935'"
           onmouseout="this.style.backgroundColor='#EF5350'"
