@@ -216,7 +216,7 @@ const handleAddItem = (menuItemId, quantity, observation) => {
   showAddItemModal.value = false
 }
 
-const handleCloseTable = (paymentMethod) => {
+const handleCloseTable = (paymentMethod, invoiceData = null) => {
   if (table.value && authStore.waiter) {
     // Check if there are pending items
     if (table.value.pendingItems.length > 0) {
@@ -224,7 +224,7 @@ const handleCloseTable = (paymentMethod) => {
       return
     }
     
-    restaurantStore.closeTable(table.value.id, authStore.waiter.name, paymentMethod)
+    restaurantStore.closeTable(table.value.id, authStore.waiter.name, paymentMethod, invoiceData)
     showCloseTableModal.value = false
     goBack()
   }

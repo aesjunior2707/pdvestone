@@ -71,8 +71,8 @@
           </div>
         </div>
 
-        <!-- Print Options -->
-        <div class="mb-6">
+        <!-- Print and Invoice Options -->
+        <div class="mb-6 space-y-3">
           <label class="flex items-center space-x-3">
             <input
               v-model="printReceipt"
@@ -80,6 +80,15 @@
               class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
             />
             <span class="text-sm text-gray-700">Imprimir recibo do cliente</span>
+          </label>
+          
+          <label class="flex items-center space-x-3">
+            <input
+              v-model="issueInvoice"
+              type="checkbox"
+              class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+            />
+            <span class="text-sm text-gray-700">Emitir nota fiscal</span>
           </label>
         </div>
 
@@ -101,6 +110,14 @@
         </div>
       </div>
     </div>
+
+    <!-- Invoice Modal -->
+    <InvoiceModal
+      v-if="showInvoiceModal"
+      :table="table"
+      @close="showInvoiceModal = false"
+      @confirm="handleInvoiceConfirm"
+    />
   </div>
 </template>
 
@@ -112,7 +129,9 @@ const props = defineProps(['table'])
 const emit = defineEmits(['close', 'confirm'])
 
 const printReceipt = ref(true)
+const issueInvoice = ref(false)
 const selectedPaymentMethod = ref('')
+const showInvoiceModal = ref(false)
 
 const paymentMethods = [
   { value: 'pix', label: 'PIX', icon: '📱' },
@@ -154,6 +173,24 @@ const finalTotal = computed(() => {
 const handleClose = () => {
   if (!selectedPaymentMethod.value) return
   
+  // If invoice is requested, show invoice modal first
+  if (issueInvoice.value) {
+    showInvoiceModal.value = true
+    return
+  }
+  
+  // Otherwise proceed with normal closure
+  proceedWithClosure()
+}
+
+const handleInvoiceConfirm = (invoiceData) => {
+  showInvoiceModal.value = false
+  
+  // Proceed with table closure including invoice data
+  proceedWithClosure(invoiceData)
+}
+
+const proceedWithClosure = (invoiceData = null) => {
   if (printReceipt.value) {
     // Simulate printing receipt with service charge and payment method
     console.log('Printing final receipt for Table', props.table.number, {
@@ -162,10 +199,11 @@ const handleClose = () => {
       serviceCharge: serviceCharge.value,
       finalTotal: finalTotal.value,
       paymentMethod: selectedPaymentMethod.value,
+      invoice: invoiceData,
       type: 'FINAL'
     })
   }
   
-  emit('confirm', selectedPaymentMethod.value)
+  emit('confirm', selectedPaymentMethod.value, invoiceData)
 }
 </script>
