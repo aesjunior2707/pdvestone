@@ -32,7 +32,8 @@
         </div>
         <button
           @click="clearFilter"
-          class="mt-6 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          class="mt-6 px-2 py-1 text-xs text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors"
+          style="background-color: #EF5350; hover:background-color: #E53935;"
         >
           Limpar
         </button>
