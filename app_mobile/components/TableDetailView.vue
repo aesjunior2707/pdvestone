@@ -12,8 +12,11 @@
         <div>
           <h2 class="text-xl font-bold text-gray-900">Mesa {{ table.number }}</h2>
           <p class="text-sm text-gray-600">
-            {{ table.items.length }} iten{{ table.items.length !== 1 ? 's' : '' }} • 
+            {{ table.items.length }} iten{{ table.items.length !== 1 ? 's' : '' }} confirmado{{ table.items.length !== 1 ? 's' : '' }} • 
             R${{ table.total.toFixed(2) }}
+            <span v-if="table.pendingItems.length > 0" class="text-amber-600 ml-2">
+              (+ {{ table.pendingItems.length }} pendente{{ table.pendingItems.length !== 1 ? 's' : '' }})
+            </span>
           </p>
         </div>
       </div>
@@ -45,38 +48,97 @@
       Adicionar item
     </button>
 
-    <!-- Items List -->
-    <div v-if="table.items.length > 0" class="space-y-3">
-      <div
-        v-for="item in table.items"
-        :key="item.id"
-        class="card"
-      >
-        <div class="flex items-start justify-between">
-          <div class="flex-1">
-            <h3 class="font-medium text-gray-900">{{ item.menuItem.name }}</h3>
-            <p class="text-sm text-gray-600 mt-1">
-              Qtd: {{ item.quantity }} × R${{ item.menuItem.price.toFixed(2) }} = 
-              R${{ (item.quantity * item.menuItem.price).toFixed(2) }}
-            </p>
-            <p v-if="item.observation" class="text-sm text-amber-600 mt-1 italic">
-              Obs: {{ item.observation }}
-            </p>
-            <p class="text-xs text-gray-500 mt-1">
-              Adicionado {{ formatTime(item.addedAt) }}
-            </p>
+    <!-- Pending Items Section -->
+    <div v-if="table.pendingItems.length > 0" class="mb-6">
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-medium text-amber-800">
+            Itens Pendentes ({{ table.pendingItems.length }})
+          </h3>
+          <div class="text-sm text-amber-700">
+            Total: R${{ table.pendingTotal.toFixed(2) }}
           </div>
-          <button
-            @click="removeItem(item.id)"
-            class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+        </div>
+        
+        <div class="space-y-2 mb-4">
+          <div
+            v-for="item in table.pendingItems"
+            :key="item.id"
+            class="flex items-center justify-between bg-white p-3 rounded border border-amber-200"
           >
-            <TrashIcon class="w-4 h-4" />
+            <div class="flex-1">
+              <h4 class="font-medium text-gray-900">{{ item.menuItem.name }}</h4>
+              <p class="text-sm text-gray-600">
+                Qtd: {{ item.quantity }} × R${{ item.menuItem.price.toFixed(2) }} = 
+                R${{ (item.quantity * item.menuItem.price).toFixed(2) }}
+              </p>
+              <p v-if="item.observation" class="text-sm text-amber-600 italic">
+                Obs: {{ item.observation }}
+              </p>
+            </div>
+            <button
+              @click="removePendingItem(item.id)"
+              class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <TrashIcon class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Pending Actions -->
+        <div class="flex space-x-3">
+          <button
+            @click="clearPendingItems"
+            class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors"
+          >
+            Cancelar Todos
+          </button>
+          <button
+            @click="sendPendingItems"
+            class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors"
+          >
+            Enviar para Cozinha
           </button>
         </div>
       </div>
     </div>
 
-    <div v-else class="text-center py-12 text-gray-500">
+    <!-- Confirmed Items List -->
+    <div v-if="table.items.length > 0">
+      <h3 class="font-medium text-gray-900 mb-3">Itens Confirmados</h3>
+      <div class="space-y-3 mb-6">
+        <div
+          v-for="item in table.items"
+          :key="item.id"
+          class="card"
+        >
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <h3 class="font-medium text-gray-900">{{ item.menuItem.name }}</h3>
+              <p class="text-sm text-gray-600 mt-1">
+                Qtd: {{ item.quantity }} × R${{ item.menuItem.price.toFixed(2) }} = 
+                R${{ (item.quantity * item.menuItem.price).toFixed(2) }}
+              </p>
+              <p v-if="item.observation" class="text-sm text-emerald-600 mt-1 italic">
+                Obs: {{ item.observation }}
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                Enviado {{ formatTime(item.addedAt) }}
+              </p>
+            </div>
+            <button
+              @click="removeItem(item.id)"
+              class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <TrashIcon class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div v-if="table.items.length === 0 && table.pendingItems.length === 0" class="text-center py-12 text-gray-500">
       <UtensilsIcon class="w-12 h-12 mx-auto mb-4 text-gray-300" />
       <p>Nenhum item adicionado a esta mesa ainda</p>
       <p class="text-sm">Toque em "Adicionar item" para começar</p>
@@ -124,6 +186,29 @@ const removeItem = (itemId) => {
   }
 }
 
+const removePendingItem = (pendingItemId) => {
+  if (table.value) {
+    restaurantStore.removePendingItemFromTable(table.value.id, pendingItemId)
+  }
+}
+
+const sendPendingItems = () => {
+  if (table.value && table.value.pendingItems.length > 0) {
+    const itemCount = table.value.pendingItems.length
+    if (confirm(`Enviar ${itemCount} iten${itemCount !== 1 ? 's' : ''} para a cozinha?\n\nEsses itens serão preparados e não poderão ser cancelados.`)) {
+      restaurantStore.sendPendingItems(table.value.id)
+    }
+  }
+}
+
+const clearPendingItems = () => {
+  if (table.value && table.value.pendingItems.length > 0) {
+    if (confirm('Cancelar todos os itens pendentes?')) {
+      restaurantStore.clearPendingItems(table.value.id)
+    }
+  }
+}
+
 const handleAddItem = (menuItemId, quantity, observation) => {
   if (table.value) {
     restaurantStore.addItemToTable(table.value.id, menuItemId, quantity, observation)
@@ -133,6 +218,12 @@ const handleAddItem = (menuItemId, quantity, observation) => {
 
 const handleCloseTable = (paymentMethod) => {
   if (table.value && authStore.waiter) {
+    // Check if there are pending items
+    if (table.value.pendingItems.length > 0) {
+      alert('Não é possível fechar a mesa com itens pendentes. Envie ou cancele os itens pendentes primeiro.')
+      return
+    }
+    
     restaurantStore.closeTable(table.value.id, authStore.waiter.name, paymentMethod)
     showCloseTableModal.value = false
     goBack()

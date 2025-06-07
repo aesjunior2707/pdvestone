@@ -70,6 +70,17 @@
               </span>
             </div>
           </div>
+
+          <!-- Pending Notice -->
+          <div class="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <div class="flex items-start space-x-2">
+              <div class="w-5 h-5 text-amber-600 mt-0.5">⏳</div>
+              <div class="text-sm text-amber-800">
+                <p class="font-medium">Item será adicionado como pendente</p>
+                <p class="text-xs mt-1">Você precisará clicar em "Enviar para Cozinha" para confirmar o pedido</p>
+              </div>
+            </div>
+          </div>
   
           <!-- Actions -->
           <div class="flex space-x-3">
@@ -83,7 +94,7 @@
               @click="handleSubmit"
               class="flex-1 btn-primary"
             >
-            Adicionar à mesa {{ table.number }}
+            Adicionar à Mesa {{ table.number }}
             </button>
           </div>
         </div>
@@ -102,17 +113,6 @@
   const notes = ref('')
   
   const handleSubmit = () => {
-    // Show confirmation before adding
-    if (confirm(`Adicionar ${quantity.value}x ${props.product.name} to Table ${props.table.number}?\n\nThis will be sent to the kitchen for preparation.`)) {
-      emit('add', props.product.id, quantity.value, notes.value)
-      
-      // Simulate printing to kitchen terminal
-      console.log('Printing to kitchen:', {
-        table: props.table.number,
-        item: props.product.name,
-        quantity: quantity.value,
-        notes: notes.value
-      })
-    }
+    emit('add', props.product.id, quantity.value, notes.value)
   }
   </script>

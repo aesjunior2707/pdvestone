@@ -11,13 +11,19 @@
         :key="table.id"
         @click="selectTable(table)"
         class="aspect-square rounded-xl border-2 transition-all duration-200 active:scale-95 flex flex-col items-center justify-center p-3 shadow-sm hover:shadow-md"
-        :class="table.status === 'available' ? 'table-available hover:bg-emerald-200' : 'table-occupied hover:bg-red-200'"
+        :class="getTableStatusClass(table)"
       >
         <div class="text-xl font-bold mb-1">{{ table.number }}</div>
-        <div v-if="table.status === 'available'" class="text-xs font-medium capitalize opacity-80">disponível</div>
-        <div v-else class="text-xs font-medium capitalize opacity-80">ocupado</div>
-        <div v-if="table.items.length > 0" class="text-xs mt-1 opacity-70">
-          {{ table.items.length }} item{{ table.items.length !== 1 ? 's' : '' }}
+        <div class="text-xs font-medium capitalize opacity-80">
+          {{ getTableStatusText(table) }}
+        </div>
+        <div v-if="table.items.length > 0 || table.pendingItems.length > 0" class="text-xs mt-1 opacity-70">
+          <div v-if="table.items.length > 0">
+            {{ table.items.length }} confirmado{{ table.items.length !== 1 ? 's' : '' }}
+          </div>
+          <div v-if="table.pendingItems.length > 0" class="text-amber-600">
+            {{ table.pendingItems.length }} pendente{{ table.pendingItems.length !== 1 ? 's' : '' }}
+          </div>
         </div>
       </button>
     </div>
@@ -31,5 +37,25 @@ const restaurantStore = useRestaurantStore()
 
 const selectTable = (table) => {
   restaurantStore.selectTable(table.id)
+}
+
+const getTableStatusClass = (table) => {
+  if (table.pendingItems.length > 0) {
+    return 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100'
+  } else if (table.status === 'occupied') {
+    return 'table-occupied hover:bg-red-200'
+  } else {
+    return 'table-available hover:bg-emerald-200'
+  }
+}
+
+const getTableStatusText = (table) => {
+  if (table.pendingItems.length > 0) {
+    return 'pendente'
+  } else if (table.status === 'occupied') {
+    return 'ocupado'
+  } else {
+    return 'disponível'
+  }
 }
 </script>
