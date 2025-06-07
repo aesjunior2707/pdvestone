@@ -43,21 +43,29 @@
         <button
           @click="setToday"
           class="px-3 py-1 text-xs bg-emerald-100 text-emerald-700 rounded-full hover:bg-emerald-200 transition-colors"
+          :class="{ 'ring-2 ring-emerald-300': isToday }"
         >
           Hoje
         </button>
         <button
           @click="setYesterday"
           class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
+          :class="{ 'ring-2 ring-gray-300': isYesterday }"
         >
           Ontem
         </button>
         <button
           @click="setThisWeek"
           class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors"
+          :class="{ 'ring-2 ring-blue-300': isThisWeek }"
         >
           Esta semana
         </button>
+      </div>
+      
+      <!-- Results Summary -->
+      <div v-if="selectedDate" class="mt-3 text-sm text-gray-600">
+        Mostrando resultados para: <span class="font-medium">{{ formatSelectedDate }}</span>
       </div>
     </div>
 
@@ -144,7 +152,7 @@ onMounted(() => {
 
 const formatDateTime = (date) => {
   const d = new Date(date)
-  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
 const formatSelectedDate = computed(() => {
@@ -165,6 +173,22 @@ const filteredTables = computed(() => {
     const tableDate = new Date(table.closedAt)
     return tableDate >= filterDate && tableDate < nextDay
   })
+})
+
+// Quick filter helpers
+const isToday = computed(() => {
+  const today = new Date().toISOString().split('T')[0]
+  return selectedDate.value === today
+})
+
+const isYesterday = computed(() => {
+  const yesterday = new Date()
+  yesterday.setDate(yesterday.getDate() - 1)
+  return selectedDate.value === yesterday.toISOString().split('T')[0]
+})
+
+const isThisWeek = computed(() => {
+  return !selectedDate.value
 })
 
 const setToday = () => {
