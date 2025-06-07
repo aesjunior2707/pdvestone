@@ -18,7 +18,7 @@
 
     <!-- Date Filter -->
     <div class="mb-6">
-      <div class="flex items-center space-x-3">
+      <div class="flex items-center">
         <div class="w-48">
           <label for="date-filter" class="block text-sm font-medium text-gray-700 mb-2">
             Filtrar por data
@@ -32,7 +32,7 @@
         </div>
         <button
           @click="clearFilter"
-          class="mt-6 px-4 py-2 text-sm text-white rounded-lg transition-colors"
+          class="mt-6 ml-1 px-4 py-2 text-sm text-white rounded-lg transition-colors"
           style="background-color: #EF5350;"
           onmouseover="this.style.backgroundColor='#E53935'"
           onmouseout="this.style.backgroundColor='#EF5350'"
