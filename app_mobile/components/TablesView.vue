@@ -16,6 +16,17 @@
         <div class="text-xl font-bold mb-1">{{ table.number }}</div>
         <div class="text-xs font-medium capitalize opacity-80">
           {{ getTableStatusText(table) }}
+<<<<<<< HEAD
+=======
+        </div>
+        <div v-if="table.items.length > 0 || table.pendingItems.length > 0" class="text-xs mt-1 opacity-70">
+          <div v-if="table.items.length > 0">
+            {{ table.items.length }} confirmado{{ table.items.length !== 1 ? 's' : '' }}
+          </div>
+          <div v-if="table.pendingItems.length > 0" class="text-amber-600">
+            {{ table.pendingItems.length }} pendente{{ table.pendingItems.length !== 1 ? 's' : '' }}
+          </div>
+>>>>>>> bacda74164eea3fa3530391690c05a3edb0836ab
         </div>
     
       </button>

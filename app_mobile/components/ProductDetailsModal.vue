@@ -80,6 +80,7 @@
               <p class="text-xs mt-1">Você precisará clicar em "Enviar" para confirmar o pedido</p>
             </div>
           </div>
+<<<<<<< HEAD
         </div>
 
         <!-- Actions -->
@@ -116,3 +117,76 @@ const handleSubmit = () => {
   emit('add', props.product.id, quantity.value, notes.value)
 }
 </script>
+=======
+  
+          <!-- Notes -->
+          <div class="mb-6">
+            <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
+                Observação
+            </label>
+            <textarea
+              id="notes"
+              v-model="notes"
+              rows="3"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              placeholder="Alguma observação especial"
+            ></textarea>
+            <p class="text-xs text-gray-500 mt-1">Obs : Isso não aparecerá no recibo</p>
+          </div>
+  
+          <!-- Total -->
+          <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+            <div class="flex justify-between items-center">
+              <span class="text-lg font-medium text-gray-900">Total</span>
+              <span class="text-xl font-bold text-emerald-600">
+                R${{ (product.price * quantity).toFixed(2) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Pending Notice -->
+          <div class="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <div class="flex items-start space-x-2">
+              <div class="w-5 h-5 text-amber-600 mt-0.5">⏳</div>
+              <div class="text-sm text-amber-800">
+                <p class="font-medium">Item será adicionado como pendente</p>
+                <p class="text-xs mt-1">Você precisará clicar em "Enviar para Cozinha" para confirmar o pedido</p>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Actions -->
+          <div class="flex space-x-3">
+            <button
+              @click="$emit('close')"
+              class="flex-1 btn-secondary"
+            >
+                Cancelar
+            </button>
+            <button
+              @click="handleSubmit"
+              class="flex-1 btn-primary"
+            >
+            Adicionar à Mesa {{ table.number }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+  
+  <script setup>
+  import { ref } from 'vue'
+  import { XIcon, MinusIcon, PlusIcon } from 'lucide-vue-next'
+  
+  const props = defineProps(['product', 'table'])
+  const emit = defineEmits(['close', 'add'])
+  
+  const quantity = ref(1)
+  const notes = ref('')
+  
+  const handleSubmit = () => {
+    emit('add', props.product.id, quantity.value, notes.value)
+  }
+  </script>
+>>>>>>> bacda74164eea3fa3530391690c05a3edb0836ab

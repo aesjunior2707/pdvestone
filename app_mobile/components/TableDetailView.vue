@@ -97,7 +97,11 @@
             @click="sendPendingItems"
             class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors"
           >
+<<<<<<< HEAD
             Enviar
+=======
+            Enviar para Cozinha
+>>>>>>> bacda74164eea3fa3530391690c05a3edb0836ab
           </button>
         </div>
       </div>
