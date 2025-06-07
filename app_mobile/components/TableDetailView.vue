@@ -194,10 +194,7 @@ const removePendingItem = (pendingItemId) => {
 
 const sendPendingItems = () => {
   if (table.value && table.value.pendingItems.length > 0) {
-    const itemCount = table.value.pendingItems.length
-    if (confirm(`Enviar ${itemCount} iten${itemCount !== 1 ? 's' : ''} para a cozinha?\n\nEsses itens serão preparados e não poderão ser cancelados.`)) {
-      restaurantStore.sendPendingItems(table.value.id)
-    }
+    restaurantStore.sendPendingItems(table.value.id)
   }
 }
 
