@@ -11,15 +11,60 @@
         </button>
         <div>
           <h2 class="text-xl font-bold text-gray-900">Histórico da Mesa</h2>
-          <p class="text-sm text-gray-600">{{ restaurantStore.closedTables.length }} mesas fechadas</p>
+          <p class="text-sm text-gray-600">{{ filteredTables.length }} mesas encontradas</p>
         </div>
       </div>
     </div>
 
+    <!-- Date Filter -->
+    <div class="mb-6">
+      <div class="flex items-center space-x-3">
+        <div class="flex-1">
+          <label for="date-filter" class="block text-sm font-medium text-gray-700 mb-2">
+            Filtrar por data
+          </label>
+          <input
+            id="date-filter"
+            v-model="selectedDate"
+            type="date"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          />
+        </div>
+        <button
+          @click="clearFilter"
+          class="mt-6 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Limpar
+        </button>
+      </div>
+      
+      <!-- Quick Date Buttons -->
+      <div class="flex space-x-2 mt-3">
+        <button
+          @click="setToday"
+          class="px-3 py-1 text-xs bg-emerald-100 text-emerald-700 rounded-full hover:bg-emerald-200 transition-colors"
+        >
+          Hoje
+        </button>
+        <button
+          @click="setYesterday"
+          class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
+        >
+          Ontem
+        </button>
+        <button
+          @click="setThisWeek"
+          class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors"
+        >
+          Esta semana
+        </button>
+      </div>
+    </div>
+
     <!-- History List -->
-    <div v-if="restaurantStore.closedTables.length > 0" class="space-y-4">
+    <div v-if="filteredTables.length > 0" class="space-y-4">
       <div
-        v-for="closedTable in restaurantStore.closedTables"
+        v-for="closedTable in filteredTables"
         :key="closedTable.id"
         class="card"
       >
@@ -75,22 +120,71 @@
 
     <div v-else class="text-center py-12 text-gray-500">
       <ClockIcon class="w-12 h-12 mx-auto mb-4 text-gray-300" />
-      <p>Nenhuma mesa fechada ainda</p>
-      <p class="text-sm">O histórico da mesa aparecerá aqui após o fechamento da tabela</p>
+      <p v-if="selectedDate">Nenhuma mesa fechada encontrada para {{ formatSelectedDate }}</p>
+      <p v-else>Nenhuma mesa fechada ainda</p>
+      <p class="text-sm">{{ selectedDate ? 'Tente selecionar uma data diferente' : 'O histórico da mesa aparecerá aqui após o fechamento da tabela' }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from 'vue'
 import { ArrowLeftIcon, ClockIcon } from 'lucide-vue-next'
 import { useRestaurantStore } from '~/stores/restaurant'
 
 const emit = defineEmits(['close'])
 const restaurantStore = useRestaurantStore()
 
+const selectedDate = ref('')
+
+// Set current date as default on mount
+onMounted(() => {
+  setToday()
+})
+
 const formatDateTime = (date) => {
   const d = new Date(date)
   return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+const formatSelectedDate = computed(() => {
+  if (!selectedDate.value) return ''
+  return new Date(selectedDate.value + 'T00:00:00').toLocaleDateString('pt-BR')
+})
+
+const filteredTables = computed(() => {
+  if (!selectedDate.value) {
+    return restaurantStore.closedTables
+  }
+  
+  const filterDate = new Date(selectedDate.value + 'T00:00:00')
+  const nextDay = new Date(filterDate)
+  nextDay.setDate(nextDay.getDate() + 1)
+  
+  return restaurantStore.closedTables.filter(table => {
+    const tableDate = new Date(table.closedAt)
+    return tableDate >= filterDate && tableDate < nextDay
+  })
+})
+
+const setToday = () => {
+  const today = new Date()
+  selectedDate.value = today.toISOString().split('T')[0]
+}
+
+const setYesterday = () => {
+  const yesterday = new Date()
+  yesterday.setDate(yesterday.getDate() - 1)
+  selectedDate.value = yesterday.toISOString().split('T')[0]
+}
+
+const setThisWeek = () => {
+  // Clear filter to show all tables from this week
+  selectedDate.value = ''
+}
+
+const clearFilter = () => {
+  selectedDate.value = ''
 }
 
 const getPaymentMethodLabel = (method) => {
