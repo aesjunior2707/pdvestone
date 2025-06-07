@@ -140,7 +140,7 @@
       <ClockIcon class="w-12 h-12 mx-auto mb-4 text-gray-300" />
       <p v-if="selectedDate">Nenhuma mesa fechada encontrada para {{ formatSelectedDate }}</p>
       <p v-else>Nenhuma mesa fechada ainda</p>
-      <p class="text-sm">{{ selectedDate ? 'Tente selecionar uma data diferente' : 'O histórico da mesa aparecerá aqui após o fechamento da tabela' }}</p>
+      <p class="text-sm">{{ selectedDate ? 'Tente selecionar uma data diferente' : 'O histórico da mesa aparecerá aqui após o fechamento da mesa' }}</p>
     </div>
   </div>
 </template>

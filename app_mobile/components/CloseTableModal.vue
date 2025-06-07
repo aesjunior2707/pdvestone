@@ -4,7 +4,7 @@
       <!-- Header -->
       <div class="sticky top-0 bg-white border-b border-gray-200 p-4 rounded-t-2xl">
         <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900">Fechar tabela {{ table.number }}</h3>
+          <h3 class="text-lg font-semibold text-gray-900">Fechar Mesa {{ table.number }}</h3>
           <button
             @click="$emit('close')"
             class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
