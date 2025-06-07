@@ -35,6 +35,9 @@
       <TableDetailView v-else-if="restaurantStore.selectedTable" />
       <TablesView v-else />
     </main>
+
+    <!-- PWA Install Prompt -->
+    <PWAInstallPrompt />
   </div>
 </template>
 
