@@ -31,7 +31,7 @@
             </p>
           </div>
           <div class="text-right">
-            <div class="font-semibold text-gray-900">R${{ closedTable.total.toFixed(2) }}</div>
+            <div class="font-semibold text-gray-900">R${{ closedTable.finalTotal.toFixed(2) }}</div>
             <button
               @click="reprintReceipt(closedTable)"
               class="text-sm text-emerald-600 hover:text-emerald-700 transition-colors"
@@ -50,6 +50,20 @@
             >
               <span class="text-gray-600">{{ group.name }} ×{{ group.totalQuantity }}</span>
               <span class="text-gray-900">R${{ group.totalPrice.toFixed(2) }}</span>
+            </div>
+            
+            <!-- Service charge in history -->
+            <div class="flex justify-between text-sm pt-2 border-t border-gray-100">
+              <span class="text-gray-600">Subtotal</span>
+              <span class="text-gray-900">R${{ closedTable.total.toFixed(2) }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Taxa de serviço (10%)</span>
+              <span class="text-gray-900">R${{ closedTable.serviceCharge.toFixed(2) }}</span>
+            </div>
+            <div class="flex justify-between text-sm font-medium pt-1 border-t border-gray-200">
+              <span class="text-gray-900">Total Final</span>
+              <span class="text-emerald-600">R${{ closedTable.finalTotal.toFixed(2) }}</span>
             </div>
           </div>
         </div>
@@ -101,7 +115,9 @@ const getGroupedItems = (items) => {
 const reprintReceipt = (closedTable) => {
   console.log('Reprinting receipt for Table', closedTable.tableNumber, {
     items: getGroupedItems(closedTable.items),
-    total: closedTable.total,
+    subtotal: closedTable.total,
+    serviceCharge: closedTable.serviceCharge,
+    finalTotal: closedTable.finalTotal,
     date: closedTable.closedAt,
     waiter: closedTable.waiter
   })

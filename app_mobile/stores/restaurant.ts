@@ -28,6 +28,8 @@ export interface ClosedTable {
   tableNumber: number
   items: OrderItem[]
   total: number
+  serviceCharge: number
+  finalTotal: number
   closedAt: Date
   waiter: string
 }
@@ -170,11 +172,16 @@ export const useRestaurantStore = defineStore('restaurant', {
     closeTable(tableId: string, waiterName: string) {
       const table = this.tables.find(t => t.id === tableId)
       if (table && table.items.length > 0) {
+        const serviceCharge = table.total * 0.10
+        const finalTotal = table.total + serviceCharge
+        
         const closedTable: ClosedTable = {
           id: `closed-${Date.now()}`,
           tableNumber: table.number,
           items: [...table.items],
           total: table.total,
+          serviceCharge: serviceCharge,
+          finalTotal: finalTotal,
           closedAt: new Date(),
           waiter: waiterName
         }

@@ -33,9 +33,22 @@
             </div>
           </div>
           
+          <!-- Subtotal -->
           <div class="flex justify-between items-center pt-3 mt-3 border-t border-gray-200">
-            <span class="text-lg font-semibold text-gray-900">Total</span>
-            <span class="text-lg font-semibold text-gray-900">R${{ table.total.toFixed(2) }}</span>
+            <span class="text-base font-medium text-gray-700">Subtotal</span>
+            <span class="text-base font-medium text-gray-700">R${{ table.total.toFixed(2) }}</span>
+          </div>
+          
+          <!-- Service Charge -->
+          <div class="flex justify-between items-center pt-2">
+            <span class="text-base font-medium text-gray-700">Taxa de serviço (10%)</span>
+            <span class="text-base font-medium text-gray-700">R${{ serviceCharge.toFixed(2) }}</span>
+          </div>
+          
+          <!-- Final Total -->
+          <div class="flex justify-between items-center pt-3 mt-3 border-t-2 border-gray-300">
+            <span class="text-lg font-bold text-gray-900">Total Final</span>
+            <span class="text-lg font-bold text-emerald-600">R${{ finalTotal.toFixed(2) }}</span>
           </div>
         </div>
 
@@ -102,12 +115,22 @@ const groupedItems = computed(() => {
   return Array.from(groups.values())
 })
 
+const serviceCharge = computed(() => {
+  return props.table.total * 0.10
+})
+
+const finalTotal = computed(() => {
+  return props.table.total + serviceCharge.value
+})
+
 const handleClose = () => {
   if (printReceipt.value) {
-    // Simulate printing receipt
+    // Simulate printing receipt with service charge
     console.log('Printing receipt for Table', props.table.number, {
       items: groupedItems.value,
-      total: props.table.total
+      subtotal: props.table.total,
+      serviceCharge: serviceCharge.value,
+      finalTotal: finalTotal.value
     })
   }
   
