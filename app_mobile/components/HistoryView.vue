@@ -29,6 +29,9 @@
             <p class="text-sm text-gray-600">
               {{ formatDateTime(closedTable.closedAt) }} • {{ closedTable.waiter }}
             </p>
+            <p class="text-sm text-blue-600 font-medium">
+              Pagamento: {{ getPaymentMethodLabel(closedTable.paymentMethod) }}
+            </p>
           </div>
           <div class="text-right">
             <div class="font-semibold text-gray-900">R${{ closedTable.finalTotal.toFixed(2) }}</div>
@@ -90,6 +93,16 @@ const formatDateTime = (date) => {
   return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
+const getPaymentMethodLabel = (method) => {
+  const methods = {
+    'pix': 'PIX',
+    'debit': 'Débito',
+    'credit': 'Crédito',
+    'cash': 'Dinheiro'
+  }
+  return methods[method] || method
+}
+
 const getGroupedItems = (items) => {
   const groups = new Map()
   
@@ -119,7 +132,9 @@ const reprintReceipt = (closedTable) => {
     serviceCharge: closedTable.serviceCharge,
     finalTotal: closedTable.finalTotal,
     date: closedTable.closedAt,
-    waiter: closedTable.waiter
+    waiter: closedTable.waiter,
+    paymentMethod: closedTable.paymentMethod,
+    type: 'REPRINT'
   })
   
   // Show feedback to user

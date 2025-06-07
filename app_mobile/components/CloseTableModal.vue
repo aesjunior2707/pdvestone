@@ -52,6 +52,25 @@
           </div>
         </div>
 
+        <!-- Payment Method Selection -->
+        <div class="mb-6">
+          <h4 class="font-medium text-gray-900 mb-3">Forma de pagamento</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <button
+              v-for="method in paymentMethods"
+              :key="method.value"
+              @click="selectedPaymentMethod = method.value"
+              class="p-3 border-2 rounded-lg text-center font-medium transition-all duration-200"
+              :class="selectedPaymentMethod === method.value 
+                ? 'border-emerald-500 bg-emerald-50 text-emerald-700' 
+                : 'border-gray-200 text-gray-700 hover:border-gray-300'"
+            >
+              <div class="text-lg mb-1">{{ method.icon }}</div>
+              <div class="text-sm">{{ method.label }}</div>
+            </button>
+          </div>
+        </div>
+
         <!-- Print Options -->
         <div class="mb-6">
           <label class="flex items-center space-x-3">
@@ -74,7 +93,8 @@
           </button>
           <button
             @click="handleClose"
-            class="flex-1 btn-primary"
+            :disabled="!selectedPaymentMethod"
+            class="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
            Fechar Mesa
           </button>
@@ -92,6 +112,14 @@ const props = defineProps(['table'])
 const emit = defineEmits(['close', 'confirm'])
 
 const printReceipt = ref(true)
+const selectedPaymentMethod = ref('')
+
+const paymentMethods = [
+  { value: 'pix', label: 'PIX', icon: '📱' },
+  { value: 'debit', label: 'Débito', icon: '💳' },
+  { value: 'credit', label: 'Crédito', icon: '💳' },
+  { value: 'cash', label: 'Dinheiro', icon: '💵' }
+]
 
 const groupedItems = computed(() => {
   const groups = new Map()
@@ -124,16 +152,20 @@ const finalTotal = computed(() => {
 })
 
 const handleClose = () => {
+  if (!selectedPaymentMethod.value) return
+  
   if (printReceipt.value) {
-    // Simulate printing receipt with service charge
-    console.log('Printing receipt for Table', props.table.number, {
+    // Simulate printing receipt with service charge and payment method
+    console.log('Printing final receipt for Table', props.table.number, {
       items: groupedItems.value,
       subtotal: props.table.total,
       serviceCharge: serviceCharge.value,
-      finalTotal: finalTotal.value
+      finalTotal: finalTotal.value,
+      paymentMethod: selectedPaymentMethod.value,
+      type: 'FINAL'
     })
   }
   
-  emit('confirm')
+  emit('confirm', selectedPaymentMethod.value)
 }
 </script>

@@ -21,6 +21,13 @@
       <div class="flex space-x-2">
         <button
           v-if="table.items.length > 0"
+          @click="printPartialReceipt"
+          class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Imprimir Parcial
+        </button>
+        <button
+          v-if="table.items.length > 0"
           @click="showCloseTableModal = true"
           class="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors"
         >
@@ -124,12 +131,55 @@ const handleAddItem = (menuItemId, quantity, observation) => {
   showAddItemModal.value = false
 }
 
-const handleCloseTable = () => {
+const handleCloseTable = (paymentMethod) => {
   if (table.value && authStore.waiter) {
-    restaurantStore.closeTable(table.value.id, authStore.waiter.name)
+    restaurantStore.closeTable(table.value.id, authStore.waiter.name, paymentMethod)
     showCloseTableModal.value = false
     goBack()
   }
+}
+
+const printPartialReceipt = () => {
+  if (table.value) {
+    const groupedItems = getGroupedItems(table.value.items)
+    const serviceCharge = table.value.total * 0.10
+    const finalTotal = table.value.total + serviceCharge
+    
+    console.log('Printing partial receipt for Table', table.value.number, {
+      items: groupedItems,
+      subtotal: table.value.total,
+      serviceCharge: serviceCharge,
+      finalTotal: finalTotal,
+      date: new Date(),
+      waiter: authStore.waiter?.name,
+      type: 'PARTIAL'
+    })
+    
+    // Show feedback to user
+    alert(`Recibo parcial da Mesa ${table.value.number} enviado para impressora`)
+  }
+}
+
+const getGroupedItems = (items) => {
+  const groups = new Map()
+  
+  items.forEach(item => {
+    const key = item.menuItem.name
+    if (groups.has(key)) {
+      const existing = groups.get(key)
+      existing.totalQuantity += item.quantity
+      existing.totalPrice += item.quantity * item.menuItem.price
+    } else {
+      groups.set(key, {
+        name: item.menuItem.name,
+        price: item.menuItem.price,
+        totalQuantity: item.quantity,
+        totalPrice: item.quantity * item.menuItem.price
+      })
+    }
+  })
+  
+  return Array.from(groups.values())
 }
 
 const formatTime = (date) => {
