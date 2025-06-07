@@ -97,11 +97,7 @@
             @click="sendPendingItems"
             class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors"
           >
-<<<<<<< HEAD
-            Enviar
-=======
             Enviar para Cozinha
->>>>>>> bacda74164eea3fa3530391690c05a3edb0836ab
           </button>
         </div>
       </div>
@@ -220,7 +216,7 @@ const handleAddItem = (menuItemId, quantity, observation) => {
   showAddItemModal.value = false
 }
 
-const handleCloseTable = (paymentMethod) => {
+const handleCloseTable = (paymentMethod, invoiceData = null) => {
   if (table.value && authStore.waiter) {
     // Check if there are pending items
     if (table.value.pendingItems.length > 0) {
@@ -228,7 +224,7 @@ const handleCloseTable = (paymentMethod) => {
       return
     }
     
-    restaurantStore.closeTable(table.value.id, authStore.waiter.name, paymentMethod)
+    restaurantStore.closeTable(table.value.id, authStore.waiter.name, paymentMethod, invoiceData)
     showCloseTableModal.value = false
     goBack()
   }

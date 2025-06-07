@@ -32,11 +32,7 @@
         </div>
         <button
           @click="clearFilter"
-<<<<<<< HEAD
-          class="w-full mt-6 ml-5 px-4 py-2 text-sm text-white rounded-lg transition-colors"
-=======
           class="mt-6 ml-1 px-4 py-2 text-sm text-white rounded-lg transition-colors"
->>>>>>> bacda74164eea3fa3530391690c05a3edb0836ab
           style="background-color: #EF5350;"
           onmouseover="this.style.backgroundColor='#E53935'"
           onmouseout="this.style.backgroundColor='#EF5350'"
@@ -92,6 +88,13 @@
             <p class="text-sm text-blue-600 font-medium">
               Pagamento: {{ getPaymentMethodLabel(closedTable.paymentMethod) }}
             </p>
+            <!-- Invoice Information -->
+            <div v-if="closedTable.invoice" class="text-sm text-emerald-600 font-medium mt-1">
+              📄 NF emitida: {{ closedTable.invoice.documentType.toUpperCase() }} {{ closedTable.invoice.documentNumber }}
+              <div v-if="closedTable.invoice.customerName" class="text-xs text-gray-600">
+                {{ closedTable.invoice.customerName }}
+              </div>
+            </div>
           </div>
           <div class="text-right">
             <div class="font-semibold text-gray-900">R${{ closedTable.finalTotal.toFixed(2) }}</div>
@@ -259,10 +262,11 @@ const reprintReceipt = (closedTable) => {
     date: closedTable.closedAt,
     waiter: closedTable.waiter,
     paymentMethod: closedTable.paymentMethod,
+    invoice: closedTable.invoice,
     type: 'REPRINT'
   })
   
   // Show feedback to user
-  alert(`Receipt for Table ${closedTable.tableNumber} sent to printer`)
+  alert(`Receipt for Table ${closedTable.tableNumber} sent to printer${closedTable.invoice ? ' (with invoice data)' : ''}`)
 }
 </script>

@@ -33,6 +33,14 @@ export interface Table {
   pendingTotal: number
 }
 
+export interface InvoiceData {
+  documentType: string
+  documentNumber: string
+  customerName: string
+  customerEmail: string
+  issuedAt: Date
+}
+
 export interface ClosedTable {
   id: string
   tableNumber: number
@@ -43,6 +51,7 @@ export interface ClosedTable {
   closedAt: Date
   waiter: string
   paymentMethod: string
+  invoice?: InvoiceData
 }
 
 export const useRestaurantStore = defineStore('restaurant', {
@@ -245,7 +254,7 @@ export const useRestaurantStore = defineStore('restaurant', {
       }
     },
 
-    closeTable(tableId: string, waiterName: string, paymentMethod: string) {
+    closeTable(tableId: string, waiterName: string, paymentMethod: string, invoiceData: InvoiceData | null = null) {
       const table = this.tables.find(t => t.id === tableId)
       if (table && table.items.length > 0) {
         const serviceCharge = table.total * 0.10
@@ -260,7 +269,8 @@ export const useRestaurantStore = defineStore('restaurant', {
           finalTotal: finalTotal,
           closedAt: new Date(),
           waiter: waiterName,
-          paymentMethod: paymentMethod
+          paymentMethod: paymentMethod,
+          invoice: invoiceData || undefined
         }
 
         this.closedTables.unshift(closedTable)
