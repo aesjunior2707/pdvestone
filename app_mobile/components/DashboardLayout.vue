@@ -6,7 +6,7 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
             <h1 class="text-xl font-bold text-gray-900">ESTONE PDV</h1>
-            <span class="text-sm text-gray-500">Bem vindo, {{ authStore.waiter?.name }}</span>
+            <span class="text-sm text-gray-500">Bem vindo, {{ authStore.user?.name }}</span>
           </div>
           
           <div class="flex items-center space-x-2">
@@ -51,12 +51,12 @@ const authStore = useAuthStore()
 const restaurantStore = useRestaurantStore()
 const showHistory = ref(false)
 
-onMounted(() => {
+onMounted(async() => {
   // Initialize auth from localStorage
   authStore.initializeAuth()
   
-  // Initialize restaurant data
-  restaurantStore.initializeTables()
+  await restaurantStore.initializeTables()
+
   restaurantStore.initializeMenuItems()
 })
 

@@ -1,10 +1,50 @@
 import { defineStore } from 'pinia'
 
+import HttpRequest from '~/services/request'
+
+import { useAuthStore } from '~/stores/auth'
+
+const http = new HttpRequest()
 export interface MenuItem {
   id: string
   name: string
   price: number
   category: string
+}
+
+export interface Products {
+  id: string
+  category_id: string
+  company_id: number
+  created_at: string
+  description: string
+  price: number
+  updated_at: string
+  subcategory_id?: string | null
+}
+
+
+export interface Category {
+  id: string
+  description: string
+}
+
+
+export interface Order {
+  company_id: string
+  created_at: string
+  id: string
+  note: string
+  product_description: string
+  product_id: string
+  quantity: number
+  status: string,
+  table_id: string
+  total_price: number
+  unit_price: number
+  updated_at: string
+  user_id: string
+  user_name: string
 }
 
 export interface OrderItem {
@@ -14,6 +54,9 @@ export interface OrderItem {
   observation: string
   addedAt: Date
 }
+
+
+
 
 export interface PendingItem {
   id: string
@@ -26,6 +69,7 @@ export interface PendingItem {
 export interface Table {
   id: string
   number: number
+  description: string
   status: 'available' | 'occupied'
   items: OrderItem[]
   pendingItems: PendingItem[]
@@ -57,25 +101,47 @@ export interface ClosedTable {
 export const useRestaurantStore = defineStore('restaurant', {
   state: () => ({
     tables: [] as Table[],
+    categories: [] as Category[],
+    products: [] as Products[],
+    pendingItems: [] as Order[],
+    ItemsConfirmed: [] as Order[],
+    pendingTotal: 0,
     menuItems: [] as MenuItem[],
     closedTables: [] as ClosedTable[],
     selectedTable: null as Table | null,
   }),
 
   actions: {
-    initializeTables() {
-      if (this.tables.length === 0) {
-        this.tables = Array.from({ length: 12 }, (_, i) => ({
-          id: `Mesa-${i + 1}`,
-          number: i + 1,
-          status: 'available' as const,
-          items: [],
-          pendingItems: [],
-          total: 0,
-          pendingTotal: 0
+
+    async initializeTables() {
+      try {
+        const res = await http.request('GET', `company-tables/${useAuthStore().user?.company_id}`)
+
+        const tablesData = (res.data as { data: Table[] }).data;
+
+        console.log('Tables data:', tablesData)
+
+        this.tables = tablesData.map((table: Table) => ({
+          id: table.id,
+          number: table.number,
+          description: table.description || '',
+          status: table.status || 'available',
+          items: table.items || [],
+          pendingItems: table.pendingItems || [],
+          total: table.total || 0,
+          pendingTotal: table.pendingTotal || 0
         }))
+
+
+        return true
+
+      }
+      catch (error) {
+        console.error('Error initializing tables:', error)
+        return false
       }
     },
+
 
     initializeMenuItems() {
       if (this.menuItems.length === 0) {
@@ -148,92 +214,86 @@ export const useRestaurantStore = defineStore('restaurant', {
       }
     },
 
-    selectTable(tableId: string) {
+    async selectTable(tableId: string) {
       this.selectedTable = this.tables.find(t => t.id === tableId) || null
-    },
+      try {
+        const res = await http.request('GET', `company-orders/${useAuthStore().user?.company_id}?table=${tableId}`)
 
-    addPendingItemToTable(tableId: string, menuItemId: string, quantity: number, observation: string) {
-      const table = this.tables.find(t => t.id === tableId)
-      const menuItem = this.menuItems.find(m => m.id === menuItemId)
-
-      if (table && menuItem) {
-        const pendingItem: PendingItem = {
-          id: `Pending-${Date.now()}-${Math.random()}`,
-          menuItem,
-          quantity,
-          observation,
-          addedAt: new Date()
-        }
-
-        table.pendingItems.push(pendingItem)
-        this.updateTablePendingTotal(tableId)
-      }
-    },
-
-    removePendingItemFromTable(tableId: string, pendingItemId: string) {
-      const table = this.tables.find(t => t.id === tableId)
-      if (table) {
-        table.pendingItems = table.pendingItems.filter(item => item.id !== pendingItemId)
-        this.updateTablePendingTotal(tableId)
-      }
-    },
-
-    sendPendingItems(tableId: string) {
-      const table = this.tables.find(t => t.id === tableId)
-      if (table && table.pendingItems.length > 0) {
-        // Convert pending items to actual order items
-        const orderItems: OrderItem[] = table.pendingItems.map(pendingItem => ({
-          id: `Order-${Date.now()}-${Math.random()}`,
-          menuItem: pendingItem.menuItem,
-          quantity: pendingItem.quantity,
-          observation: pendingItem.observation,
-          addedAt: new Date()
+        const responseData = res.data as { data: Order[] };
+        this.ItemsConfirmed = responseData.data.map(order => ({
+          id: order.id,
+          company_id: order.company_id,
+          created_at: order.created_at,
+          note: order.note,
+          product_description: order.product_description,
+          product_id: order.product_id,
+          quantity: order.quantity,
+          status: order.status,
+          table_id: order.table_id,
+          total_price: order.total_price,
+          unit_price: order.unit_price,
+          updated_at: order.updated_at,
+          user_id: order.user_id,
+          user_name: order.user_name
         }))
-
-        // Add to actual items
-        table.items.push(...orderItems)
-        table.status = 'occupied'
-
-        // Print to kitchen
-        console.log('Sending to kitchen for Table', table.number, {
-          items: orderItems.map(item => ({
-            name: item.menuItem.name,
-            quantity: item.quantity,
-            observation: item.observation
-          }))
-        })
-
-        // Clear pending items
-        table.pendingItems = []
-        table.pendingTotal = 0
-
-        // Update totals
-        this.updateTableTotal(tableId)
+      }
+      catch (error) {
+        console.error('Error fetching orders for table:', error)
       }
     },
 
-    clearPendingItems(tableId: string) {
-      const table = this.tables.find(t => t.id === tableId)
-      if (table) {
-        table.pendingItems = []
-        table.pendingTotal = 0
+    async addPendingItemToTable(order: Order) {
+      if (order) {
+        order.id = `ORD-${Date.now()}-${Math.random()}`
+
+        console.log('Adding pending item to table:', order)
+        this.pendingItems.push(order)
+        this.updateTablePendingTotal()
       }
     },
 
-    addItemToTable(tableId: string, menuItemId: string, quantity: number, observation: string) {
-      // This method now adds to pending items instead of directly to the table
-      this.addPendingItemToTable(tableId, menuItemId, quantity, observation)
+    removePendingItemFromTable(pendingItemId: string) {
+      this.pendingItems = this.pendingItems.filter(item => item.id !== pendingItemId)
+      this.updateTablePendingTotal()
     },
 
-    removeItemFromTable(tableId: string, orderItemId: string) {
-      const table = this.tables.find(t => t.id === tableId)
-      if (table) {
-        table.items = table.items.filter(item => item.id !== orderItemId)
-        if (table.items.length === 0 && table.pendingItems.length === 0) {
-          table.status = 'available'
-        }
-        this.updateTableTotal(tableId)
+    async sendPendingItems() {
+      try {
+        const res = await http.request('POST', `company-orders/`, this.pendingItems)
+        this.pendingItems = []
+        this.pendingTotal = 0
+
+        return true
       }
+      catch (error) {
+        console.error('Error sending pending items:', error)
+        throw error
+      }
+
+    },
+
+    clearPendingItems() {
+      this.pendingItems = []
+      this.pendingTotal = 0
+    },
+
+    async addItemToTable(order: Order) {
+      this.addPendingItemToTable(order)
+    },
+
+    async removeItemFromTable(orderItemId: string) {
+      try {
+          http.request('DELETE', `company-orders/${useAuthStore().user?.company_id}/${orderItemId}`).then(() => {
+            this.selectTable(this.selectedTable?.id || '')
+          })
+      }
+      catch (error) {
+        console.error('Error removing item from table:', error)
+      }
+
+
+      //this.updateTableTotal(tableId)
+
     },
 
     updateTableTotal(tableId: string) {
@@ -245,13 +305,10 @@ export const useRestaurantStore = defineStore('restaurant', {
       }
     },
 
-    updateTablePendingTotal(tableId: string) {
-      const table = this.tables.find(t => t.id === tableId)
-      if (table) {
-        table.pendingTotal = table.pendingItems.reduce((sum, item) =>
-          sum + (item.menuItem.price * item.quantity), 0
-        )
-      }
+    updateTablePendingTotal() {
+      this.pendingTotal = this.pendingItems.reduce((sum, item) =>
+        sum + (item.unit_price * item.quantity), 0
+      );
     },
 
     closeTable(tableId: string, waiterName: string, paymentMethod: string, invoiceData: InvoiceData | null = null) {
@@ -259,7 +316,7 @@ export const useRestaurantStore = defineStore('restaurant', {
       if (table && table.items.length > 0) {
         const serviceCharge = table.total * 0.10
         const finalTotal = table.total + serviceCharge
-        
+
         const closedTable: ClosedTable = {
           id: `closed-${Date.now()}`,
           tableNumber: table.number,
@@ -277,9 +334,9 @@ export const useRestaurantStore = defineStore('restaurant', {
 
         // Reset table
         table.items = []
-        table.pendingItems = []
+        this.pendingItems = []
         table.total = 0
-        table.pendingTotal = 0
+        this.pendingTotal = 0
         table.status = 'available'
 
         if (this.selectedTable?.id === tableId) {
@@ -287,16 +344,46 @@ export const useRestaurantStore = defineStore('restaurant', {
         }
       }
     },
+    async getCategorysCompany() {
+      try {
+        const res = await http.request('GET', `company-category/${useAuthStore().user?.company_id}`)
 
-    getMenuItemsByCategory() {
-      const categories: Record<string, MenuItem[]> = {}
-      this.menuItems.forEach(item => {
-        if (!categories[item.category]) {
-          categories[item.category] = []
-        }
-        categories[item.category].push(item)
-      })
-      return categories
+        const categoriesData = (res.data as { data: { id: string, description: string }[] }).data;
+
+        this.categories = categoriesData.map(category => ({
+          id: category.id,
+          description: category.description
+        }));
+      }
+      catch (error) {
+        console.error('Error getting categories:', error)
+        return []
+      }
+    },
+
+    async getProductsCategory(categoryId: string) {
+      try {
+        const res = await http.request('GET', `company-products/${useAuthStore().user?.company_id}/${categoryId}`)
+
+        const productsData = (res.data as { data: Products[] }).data;
+
+        this.products = productsData.map(product => ({
+          id: product.id,
+          category_id: product.category_id,
+          company_id: product.company_id,
+          created_at: product.created_at,
+          description: product.description,
+          price: product.price,
+          updated_at: product.updated_at,
+          subcategory_id: product.subcategory_id || null
+        }));
+
+        console.log('Products by category:', this.products)
+        return this.products
+      }
+      catch (error) {
+        console.error('Error getting products by category:', error)
+      }
     }
   }
 })

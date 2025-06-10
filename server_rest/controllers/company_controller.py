@@ -2,7 +2,7 @@ from flask import request, jsonify
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from marshmallow import ValidationError
 from models.company import Company
-from schemas.company_schema import company_schema, companies_schema, company_update_schema
+from schemas.company_schema import companies_schema,company_schema,company_update_schema
 from config.database import db
 
 class CompanyController:

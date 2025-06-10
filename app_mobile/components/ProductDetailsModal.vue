@@ -18,7 +18,7 @@
       <div class="p-4">
         <!-- Product Info -->
         <div class="mb-6">
-          <h4 class="text-xl font-semibold text-gray-900 mb-2">{{ product.name }}</h4>
+          <h4 class="text-xl font-semibold text-gray-900 mb-2">{{ product.description }}</h4>
           <p class="text-lg text-emerald-600 font-medium">R${{ product.price.toFixed(2) }}</p>
         </div>
 
@@ -113,6 +113,6 @@ const quantity = ref(1)
 const notes = ref('')
 
 const handleSubmit = () => {
-  emit('add', props.product.id, quantity.value, notes.value)
+  emit('add', props.product.id, props.product.description,props.product.price,quantity.value, notes.value)
 }
 </script>

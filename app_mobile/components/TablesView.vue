@@ -13,7 +13,7 @@
         class="aspect-square rounded-xl border-2 transition-all duration-200 active:scale-95 flex flex-col items-center justify-center p-3 shadow-sm hover:shadow-md"
         :class="getTableStatusClass(table)"
       >
-        <div class="text-xl font-bold mb-1">{{ table.number }}</div>
+        <div class="text-xl font-bold mb-1">{{ table.description }}</div>
         <div class="text-xs font-medium capitalize opacity-80">
           {{ getTableStatusText(table) }}
         </div>

@@ -8,12 +8,12 @@
       
       <form @submit.prevent="handleLogin" class="space-y-6">
         <div>
-          <label for="waiter-name" class="block text-sm font-medium text-gray-700 mb-2">
+          <label for="username-name" class="block text-sm font-medium text-gray-700 mb-2">
             Usuário
           </label>
           <input
-            id="waiter-name"
-            v-model="waiterName"
+            id="username-name"
+            v-model="username"
             type="text"
             required
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
@@ -79,7 +79,7 @@ import { useAuthStore } from '~/stores/auth'
 
 const authStore = useAuthStore()
 
-const waiterName = ref('')
+const username = ref('')
 const password = ref('')
 const rememberMe = ref(true)
 const isLoading = ref(false)
@@ -92,7 +92,7 @@ onMounted(() => {
     if (savedCredentials) {
       try {
         const credentials = JSON.parse(savedCredentials)
-        waiterName.value = credentials.username || ''
+        username.value = credentials.username || ''
         rememberMe.value = credentials.rememberMe !== false
       } catch (error) {
         console.error('Error loading saved credentials:', error)
@@ -102,23 +102,22 @@ onMounted(() => {
 })
 
 const handleLogin = async () => {
-  if (!waiterName.value || !password.value) return
+  if (!username.value || !password.value) return
   
   isLoading.value = true
   error.value = ''
   
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500))
-  
-  const success = authStore.login(waiterName.value, password.value)
-  
+  const success = authStore.login(username.value, password.value)
+
   if (success) {
     // Save credentials if remember me is checked
     if (rememberMe.value && process.client) {
       const credentials = {
-        username: waiterName.value,
+        username: username.value,
         rememberMe: rememberMe.value
       }
+
+
       localStorage.setItem('restaurant_credentials', JSON.stringify(credentials))
     } else if (process.client) {
       // Clear saved credentials if remember me is unchecked

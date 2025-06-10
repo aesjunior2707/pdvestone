@@ -1,11 +1,19 @@
 <template>
-  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
-    <div class="bg-white w-full sm:max-w-lg sm:mx-4 rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto">
+  <div
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50"
+  >
+    <div
+      class="bg-white w-full sm:max-w-lg sm:mx-4 rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto"
+    >
       <!-- Header -->
-      <div class="sticky top-0 bg-white border-b border-gray-200 p-4 rounded-t-2xl">
+      <div
+        class="sticky top-0 bg-white border-b border-gray-200 p-4 rounded-t-2xl"
+      >
         <div class="flex items-center justify-between">
           <h3 class="text-lg font-semibold text-gray-900">
-            {{ selectedCategory ? selectedCategory : 'Adicionar novo item' }}
+            {{
+              category.selected ? category.description : "Adicionar novo item"
+            }}
           </h3>
           <button
             @click="$emit('close')"
@@ -19,16 +27,16 @@
       <!-- Content -->
       <div class="p-4">
         <!-- Category Selection -->
-        <div v-if="!selectedCategory">
+        <div v-if="!category.selected">
           <h4 class="text-base font-medium text-gray-700 mb-4">Categoria</h4>
           <div class="grid grid-cols-2 gap-3">
             <button
-              v-for="(items, category) in menuCategories"
-              :key="category"
-              @click="selectedCategory = category"
+              v-for="category in categories"
+              :key="category.id"
+              @click="onClickSelectCategory(category)"
               class="p-4 bg-gray-100 hover:bg-gray-200 rounded-lg text-center font-medium text-gray-700 transition-colors duration-200 active:scale-95"
             >
-              {{ category }}
+              {{ category.description }}
             </button>
           </div>
         </div>
@@ -38,25 +46,34 @@
           <!-- Back to Categories -->
           <div class="flex items-center mb-4">
             <button
-              @click="selectedCategory = null"
+              @click="onClickBackToCategories"
               class="p-2 -ml-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <ArrowLeftIcon class="w-5 h-5" />
             </button>
-            <span class="text-sm text-gray-600 ml-2">Voltar para categorias</span>
+            <span class="text-sm text-gray-600 ml-2"
+              >Voltar para categorias</span
+            >
           </div>
 
           <!-- Product List -->
           <div class="space-y-3">
             <button
-              v-for="item in menuCategories[selectedCategory]"
-              :key="item.id"
-              @click="selectProduct(item)"
+              v-for="product in products"
+              :key="product.id"
+              @click="selectProduct(product)"
               class="w-full flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors text-left"
             >
               <div class="flex-1">
-                <div class="font-medium text-gray-900">{{ item.name }}</div>
-                <div class="text-sm text-gray-600">R${{ item.price.toFixed(2) }}</div>
+                <div class="font-medium text-gray-900">
+                  {{ product.description }}
+                </div>
+                <div
+                  class="text-sm text-gray-600"
+                  v-if="!product.subcategory_id"
+                >
+                  R${{ product.price.toFixed(2) }}
+                </div>
               </div>
               <ArrowRightIcon class="w-5 h-5 text-gray-400" />
             </button>
@@ -77,31 +94,52 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { XIcon, ArrowLeftIcon, ArrowRightIcon } from 'lucide-vue-next'
-import { useRestaurantStore } from '~/stores/restaurant'
+import { ref, computed, watch } from "vue";
+import { XIcon, ArrowLeftIcon, ArrowRightIcon } from "lucide-vue-next";
+import { useRestaurantStore } from "~/stores/restaurant";
 
-const props = defineProps(['table'])
-const emit = defineEmits(['close', 'add'])
+const props = defineProps(["table"]);
 
-const restaurantStore = useRestaurantStore()
+const emit = defineEmits(["close", "add"]);
 
-const selectedCategory = ref(null)
-const selectedProduct = ref(null)
+const restaurantStore = useRestaurantStore();
 
-const menuCategories = computed(() => restaurantStore.getMenuItemsByCategory())
+const category = ref({
+  selected: false,
+  description: "",
+  id: null,
+});
 
-// Reset when category changes
-watch(selectedCategory, () => {
-  selectedProduct.value = null
-})
+const selectedProduct = ref(null);
+
+const categories = computed(() => restaurantStore.categories);
+
+const products = computed(() => restaurantStore.products);
+
+const onClickSelectCategory = async (pcategory) => {
+  await restaurantStore.getProductsCategory(pcategory.id).then(() => {
+    category.value.selected = true;
+    category.value.description = pcategory.description;
+    category.value.id = pcategory.id;
+  });
+};
+
+const onClickBackToCategories = () => {
+  category.value.selected = false;
+  category.value.description = "";
+  category.value.id = null;
+};
 
 const selectProduct = (product) => {
-  selectedProduct.value = product
-}
+  if (!product.subcategory_id) {
+    selectedProduct.value = product;
+  } else {
+    console.log("Subcategories are not supported yet.");
+  }
+};
 
-const handleAddProduct = (productId, quantity, observation) => {
-  emit('add', productId, quantity, observation)
-  selectedProduct.value = null
-}
+const handleAddProduct = (productId,product_description, quantity, observation) => {
+  emit("add", productId,product_description ,quantity, observation);
+  selectedProduct.value = null;
+};
 </script>

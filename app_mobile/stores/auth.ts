@@ -1,9 +1,13 @@
 import { defineStore } from 'pinia'
+import HttpRequest from '~/services/request';
+
+
+const http = new HttpRequest()
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     isAuthenticated: false,
-    waiter: null as { id: string; name: string } | null,
+    user: null as { username: string; name: string, company_id: string,id : string } | null,
   }),
 
   actions: {
@@ -14,9 +18,9 @@ export const useAuthStore = defineStore('auth', {
         if (savedAuth) {
           try {
             const authData = JSON.parse(savedAuth)
-            if (authData.isAuthenticated && authData.waiter) {
+            if (authData.isAuthenticated && authData.user) {
               this.isAuthenticated = authData.isAuthenticated
-              this.waiter = authData.waiter
+              this.user = authData.user
             }
           } catch (error) {
             console.error('Error parsing saved auth data:', error)
@@ -26,39 +30,48 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    login(waiterName: string, password: string) {
-      // Simple authentication - in production, this would be a proper API call
-      const validWaiters = [
-        { id: '4', name: 'admin', password: '123' }
-      ]
+    async login(username: string, password: string) {
+      try {
+        const res = await http.request('POST', 'auth/login', { username, password })
 
-      const waiter = validWaiters.find(w => 
-        w.name.toLowerCase() === waiterName.toLowerCase() && w.password === password
-      )
+        if (res.status !== 200) {
+          console.error('Login failed:', res.data)
+          return false
+        }
 
-      if (waiter) {
-        this.isAuthenticated = true
-        this.waiter = { id: waiter.id, name: waiter.name }
-        
-        // Save to localStorage
-        if (process.client) {
+        const responseData = res.data as { success: string, name_user: string, company_id: string,id: string };
+        if (responseData.success) {
+          this.isAuthenticated = true
+
+          this.user = {
+            username: username,
+            name: responseData.name_user,
+            company_id: responseData.company_id,
+            id: responseData.id // Assuming company_id is used as user ID
+          }
+
           const authData = {
             isAuthenticated: this.isAuthenticated,
-            waiter: this.waiter,
+            user: this.user,
             loginTime: new Date().toISOString()
           }
+
           localStorage.setItem('restaurant_auth', JSON.stringify(authData))
         }
-        
-        return true
+
+
+        return res
       }
-      return false
+      catch (error) {
+        console.error('Login request failed:', error)
+        return false
+      }
     },
 
     logout() {
       this.isAuthenticated = false
-      this.waiter = null
-      
+      this.user = null
+
       // Clear localStorage
       if (process.client) {
         localStorage.removeItem('restaurant_auth')
@@ -75,13 +88,13 @@ export const useAuthStore = defineStore('auth', {
             const loginTime = new Date(authData.loginTime)
             const now = new Date()
             const hoursSinceLogin = (now.getTime() - loginTime.getTime()) / (1000 * 60 * 60)
-            
+
             // Optional: Auto-logout after 24 hours
             if (hoursSinceLogin > 24) {
               this.logout()
               return false
             }
-            
+
             return true
           } catch (error) {
             console.error('Error validating session:', error)

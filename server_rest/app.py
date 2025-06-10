@@ -2,7 +2,12 @@ from flask import Flask, jsonify
 from config.database import create_app, init_database, db
 from routes.company_routes import company_bp
 from routes.users_routes import users_bp
-
+from routes.auth_routes import auth_bp
+from routes.company_tables_routes import company_tables_bp
+from routes.category_routes import category_bp
+from routes.company_products_routes import company_products_bp
+from routes.subcategory_routes import subcategory_bp
+from routes.orders_routes import orders_bp
 def create_application():
     """Create and configure the main Flask application."""
     app = create_app()
@@ -10,6 +15,12 @@ def create_application():
     # Register blueprints
     app.register_blueprint(company_bp)
     app.register_blueprint(users_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(company_tables_bp)
+    app.register_blueprint(category_bp)
+    app.register_blueprint(company_products_bp)
+    app.register_blueprint(subcategory_bp)
+    app.register_blueprint(orders_bp)
     
     # Health check endpoint
     @app.route('/health', methods=['GET'])
