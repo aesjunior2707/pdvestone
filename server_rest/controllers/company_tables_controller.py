@@ -24,6 +24,9 @@ class CompanyTablesController:
                 }), 200
             
             result = company_tables_schema.dump(tables)
+
+            for table in result:
+                print("Table data:", table['id'])
             
             return jsonify({
                 'success': True,

@@ -384,6 +384,17 @@ export const useRestaurantStore = defineStore('restaurant', {
       catch (error) {
         console.error('Error getting products by category:', error)
       }
+    },
+
+    getTotalTable(): number {
+      if (this.ItemsConfirmed.length === 0) {
+        return 0;
+      }
+
+      return this.ItemsConfirmed.reduce((total, item) => {
+        return total + (item.unit_price * item.quantity);
+      }, 0);
     }
   }
+
 })

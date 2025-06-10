@@ -18,7 +18,7 @@
               ItemsConfirmed.length !== 1 ? "s" : ""
             }}
             confirmado{{ ItemsConfirmed.length !== 1 ? "s" : "" }} • R${{
-              table.total.toFixed(2)
+              total_table.toFixed(2)
             }}
             <span
               v-if="table.pendingItems.length > 0"
@@ -174,7 +174,7 @@
     <!-- Close Table Modal -->
     <CloseTableModal
       v-if="showCloseTableModal"
-      :table="table"
+      :itemsTable="ItemsConfirmed"
       @close="showCloseTableModal = false"
       @confirm="handleCloseTable"
     />
@@ -196,9 +196,15 @@ const restaurantStore = useRestaurantStore();
 const authStore = useAuthStore();
 
 const showAddItemModal = ref(false);
+
+
 const showCloseTableModal = ref(false);
 
 const table = computed(() => restaurantStore.selectedTable);
+
+const total_table = computed(() => {
+  return restaurantStore.getTotalTable(table.value);
+});
 
 const ItemsConfirmed = computed(() => {
   return restaurantStore.ItemsConfirmed

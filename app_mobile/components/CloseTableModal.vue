@@ -4,7 +4,7 @@
       <!-- Header -->
       <div class="sticky top-0 bg-white border-b border-gray-200 p-4 rounded-t-2xl">
         <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900">Fechar Mesa {{ table.number }}</h3>
+          <h3 class="text-lg font-semibold text-gray-900">Fechar Mesa {{ itemsTable.table_id }}</h3>
           <button
             @click="$emit('close')"
             class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -36,7 +36,7 @@
           <!-- Subtotal -->
           <div class="flex justify-between items-center pt-3 mt-3 border-t border-gray-200">
             <span class="text-base font-medium text-gray-700">Subtotal</span>
-            <span class="text-base font-medium text-gray-700">R${{ table.total.toFixed(2) }}</span>
+            <span class="text-base font-medium text-gray-700">R${{ total_price.toFixed(2) }}</span>
           </div>
           
           <!-- Service Charge -->
@@ -125,7 +125,7 @@
 import { ref, computed } from 'vue'
 import { XIcon } from 'lucide-vue-next'
 
-const props = defineProps(['table'])
+const props = defineProps(['itemsTable'])
 const emit = defineEmits(['close', 'confirm'])
 
 const printReceipt = ref(true)
@@ -140,21 +140,27 @@ const paymentMethods = [
   { value: 'cash', label: 'Dinheiro', icon: '💵' }
 ]
 
+const total_price = computed(() => {
+  return props.itemsTable.reduce((total, item) => {
+    return total + (item.quantity * item.unit_price)
+  }, 0)
+})
+
 const groupedItems = computed(() => {
   const groups = new Map()
   
-  props.table.items.forEach(item => {
-    const key = item.menuItem.name
+  props.itemsTable.forEach(item => {
+    const key = item.product_description
     if (groups.has(key)) {
       const existing = groups.get(key)
       existing.totalQuantity += item.quantity
-      existing.totalPrice += item.quantity * item.menuItem.price
+      existing.totalPrice += item.quantity * item.unit_price
     } else {
       groups.set(key, {
-        name: item.menuItem.name,
-        price: item.menuItem.price,
+        name: item.product_description,
+        price: item.unit_price,
         totalQuantity: item.quantity,
-        totalPrice: item.quantity * item.menuItem.price
+        totalPrice: item.quantity * item.unit_price
       })
     }
   })
@@ -163,11 +169,11 @@ const groupedItems = computed(() => {
 })
 
 const serviceCharge = computed(() => {
-  return props.table.total * 0.10
+  return total_price.value * 0.10
 })
 
 const finalTotal = computed(() => {
-  return props.table.total + serviceCharge.value
+  return total_price.value + serviceCharge.value
 })
 
 const handleClose = () => {
@@ -185,24 +191,11 @@ const handleClose = () => {
 
 const handleInvoiceConfirm = (invoiceData) => {
   showInvoiceModal.value = false
-  
-  // Proceed with table closure including invoice data
+
   proceedWithClosure(invoiceData)
 }
 
 const proceedWithClosure = (invoiceData = null) => {
-  if (printReceipt.value) {
-    // Simulate printing receipt with service charge and payment method
-    console.log('Printing final receipt for Table', props.table.number, {
-      items: groupedItems.value,
-      subtotal: props.table.total,
-      serviceCharge: serviceCharge.value,
-      finalTotal: finalTotal.value,
-      paymentMethod: selectedPaymentMethod.value,
-      invoice: invoiceData,
-      type: 'FINAL'
-    })
-  }
   
   emit('confirm', selectedPaymentMethod.value, invoiceData)
 }
