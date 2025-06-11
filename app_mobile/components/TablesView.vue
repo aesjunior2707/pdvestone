@@ -33,7 +33,7 @@ const selectTable = (table) => {
 }
 
 const getTableStatusClass = (table) => {
-  if (table.pendingItems.length > 0) {
+  if (table.status === 'pedding') {
     return 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100'
   } else if (table.status === 'occupied') {
     return 'table-occupied hover:bg-red-200'

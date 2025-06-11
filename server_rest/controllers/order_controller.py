@@ -9,28 +9,37 @@ class OrderController:
     """Controller class for handling company-related HTTP requests."""
     
     @staticmethod
-    def get_order_company(company_id):
+    def get_order_company(company_id,table_id=None):
         """
         GET /company-orders/<company_id> - Retrieve a specific user by Company Id.
        
         """
         try:
-            table_number = request.args.get('table')
+            table_number = table_id
+            _request_parameter = False   
+            
+            if not table_id:
+                _request_parameter = True
+                table_number = request.args.get('table')
 
             order = Orders.query.filter_by(company_id=company_id,table_id=table_number).all()
             
-            if not order:
+            if _request_parameter:
+                if not order:
+                    return jsonify({
+                        'success': True,
+                        'data': []
+                    }), 200
+                
+            result = orders_schema.dump(order)
+
+            if _request_parameter:
                 return jsonify({
                     'success': True,
-                    'data': []
+                    'data': result
                 }), 200
             
-            result = orders_schema.dump(order)
-            
-            return jsonify({
-                'success': True,
-                'data': result
-            }), 200
+            return result
             
         except SQLAlchemyError as e:
             return jsonify({

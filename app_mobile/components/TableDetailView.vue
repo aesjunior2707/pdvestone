@@ -234,7 +234,9 @@ const sendPendingItems = () => {
   if (restaurantStore.pendingItems.length > 0) {
     restaurantStore.sendPendingItems().then(() => {
       showAddItemModal.value = false;
-       goBack();
+        restaurantStore.initializeTables().then(() => {
+          goBack();
+        });
     });
   }
 };

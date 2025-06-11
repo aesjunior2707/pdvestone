@@ -4,7 +4,7 @@ from marshmallow import ValidationError
 from models.tables import Tables
 from schemas.company_tables import company_table_schema,company_tables_schema, company_tables_update_schema
 from config.database import db
-
+from controllers.order_controller import OrderController
 class CompanyTablesController:
     """Controller class for handling company-related HTTP requests."""
     
@@ -25,9 +25,13 @@ class CompanyTablesController:
             
             result = company_tables_schema.dump(tables)
 
-            for table in result:
-                print("Table data:", table['id'])
-            
+            for table in result:            
+                controller_order = OrderController()
+                orders_table = controller_order.get_order_company(table['company_id'], table['id'])
+                
+                status = 'available' if len(orders_table) == 0 else 'occupied'
+                table['status'] = status 
+                
             return jsonify({
                 'success': True,
                 'data': result

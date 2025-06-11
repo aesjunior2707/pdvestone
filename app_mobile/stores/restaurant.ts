@@ -119,8 +119,6 @@ export const useRestaurantStore = defineStore('restaurant', {
 
         const tablesData = (res.data as { data: Table[] }).data;
 
-        console.log('Tables data:', tablesData)
-
         this.tables = tablesData.map((table: Table) => ({
           id: table.id,
           number: table.number,
@@ -245,10 +243,20 @@ export const useRestaurantStore = defineStore('restaurant', {
     async addPendingItemToTable(order: Order) {
       if (order) {
         order.id = `ORD-${Date.now()}-${Math.random()}`
-
+      
         console.log('Adding pending item to table:', order)
         this.pendingItems.push(order)
         this.updateTablePendingTotal()
+
+        this.tables = this.tables.map(table => {
+          if (table.id === order.table_id) {
+            return {
+              ...table,
+              status: 'pedding' // ou 'occupied', conforme necessário
+            }
+          }
+          return table
+        })
       }
     },
 
@@ -259,7 +267,7 @@ export const useRestaurantStore = defineStore('restaurant', {
 
     async sendPendingItems() {
       try {
-        const res = await http.request('POST', `company-orders/`, this.pendingItems)
+        await http.request('POST', `company-orders/`, this.pendingItems)
         this.pendingItems = []
         this.pendingTotal = 0
 
