@@ -277,9 +277,9 @@ const handleAddItem = async (
 };
 
 const handleCloseTable = (paymentMethod, invoiceData = null) => {
-  if (table.value && authStore.waiter) {
-    // Check if there are pending items
-    if (table.value.pendingItems.length > 0) {
+  if (table.value && authStore.user) {
+  
+    if (pendingItems.value.length > 0) {
       alert(
         "Não é possível fechar a mesa com itens pendentes. Envie ou cancele os itens pendentes primeiro."
       );
@@ -292,6 +292,8 @@ const handleCloseTable = (paymentMethod, invoiceData = null) => {
       paymentMethod,
       invoiceData
     );
+
+    
     showCloseTableModal.value = false;
     goBack();
   }
