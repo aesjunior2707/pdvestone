@@ -56,8 +56,6 @@ onMounted(async() => {
   authStore.initializeAuth()
   
   await restaurantStore.initializeTables()
-
-  restaurantStore.initializeMenuItems()
 })
 
 const handleLogout = () => {

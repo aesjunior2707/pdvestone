@@ -98,6 +98,16 @@ export interface ClosedTable {
   invoice?: InvoiceData
 }
 
+export interface SalesRecord {
+  id: string,
+  company_id: string,
+  table_id: string,
+  payment_type: string,
+  total_amount: number,
+  created_at: string,
+  updated_at: string
+}
+
 export const useRestaurantStore = defineStore('restaurant', {
   state: () => ({
     tables: [] as Table[],
@@ -144,70 +154,7 @@ export const useRestaurantStore = defineStore('restaurant', {
     initializeMenuItems() {
       if (this.menuItems.length === 0) {
         this.menuItems = [
-          // BEBIDAS
-          { id: '1', name: 'Coca Cola', price: 3.99, category: 'BEBIDAS' },
-          { id: '2', name: 'Suco Natural de Laranja', price: 4.99, category: 'BEBIDAS' },
-          { id: '3', name: 'Água com Gás', price: 2.50, category: 'BEBIDAS' },
-          { id: '4', name: 'Refrigerante Guaraná', price: 3.99, category: 'BEBIDAS' },
 
-          // CERVEJAS
-          { id: '5', name: 'Heineken Long Neck', price: 9.99, category: 'CERVEJAS' },
-          { id: '6', name: 'Brahma Chopp', price: 7.50, category: 'CERVEJAS' },
-          { id: '7', name: 'Skol Pilsen', price: 6.99, category: 'CERVEJAS' },
-          { id: '8', name: 'Stella Artois', price: 10.99, category: 'CERVEJAS' },
-          { id: '9', name: 'Budweiser', price: 9.50, category: 'CERVEJAS' },
-
-          // BATIDAS
-          { id: '10', name: 'Batida de Coco', price: 12.00, category: 'BATIDAS' },
-          { id: '11', name: 'Batida de Maracujá', price: 13.00, category: 'BATIDAS' },
-          { id: '12', name: 'Batida de Morango', price: 12.50, category: 'BATIDAS' },
-          { id: '13', name: 'Batida de Amendoim', price: 13.50, category: 'BATIDAS' },
-
-          // SALADAS
-          { id: '14', name: 'Salada Caesar', price: 12.99, category: 'SALADAS' },
-          { id: '15', name: 'Salada Caprese', price: 11.99, category: 'SALADAS' },
-          { id: '16', name: 'Salada Tropical', price: 10.99, category: 'SALADAS' },
-
-
-          // Entradas
-          { id: '17', name: 'Bruschetta', price: 12.00, category: 'Entradas' },
-          { id: '18', name: 'Ceviche', price: 18.50, category: 'Entradas' },
-          { id: '19', name: 'Carpaccio', price: 22.00, category: 'Entradas' },
-
-          // Peixe / Camarão
-          { id: '20', name: 'Salmão Grelhado', price: 45.90, category: 'Peixe / Camarão' },
-          { id: '21', name: 'Camarão ao Alho e Óleo', price: 52.00, category: 'Peixe / Camarão' },
-          { id: '22', name: 'Moqueca de Peixe', price: 48.50, category: 'Peixe / Camarão' },
-
-          // Carne / Massa
-          { id: '23', name: 'Filé Mignon com Fettuccine', price: 55.00, category: 'Carne / Massa' },
-          { id: '24', name: 'Lasanha à Bolonhesa', price: 38.00, category: 'Carne / Massa' },
-          { id: '25', name: 'Bife Ancho com Batatas', price: 58.00, category: 'Carne / Massa' },
-
-          // Infantil
-          { id: '26', name: 'Mini Hambúrguer com Fritas', price: 22.00, category: 'Infantil' },
-          { id: '27', name: 'Espaguete ao Sugo', price: 18.00, category: 'Infantil' },
-          { id: '28', name: 'Nuggets com Purê', price: 20.00, category: 'Infantil' },
-
-          // Sobremesa
-          { id: '29', name: 'Petit Gâteau', price: 9.90, category: 'Sobremesa' },
-          { id: '30', name: 'Pudim de Leite', price: 7.50, category: 'Sobremesa' },
-          { id: '31', name: 'Mousse de Maracujá', price: 6.50, category: 'Sobremesa' },
-
-          // Vinhos
-          { id: '32', name: 'Vinho Tinto Cabernet', price: 89.90, category: 'Vinhos' },
-          { id: '33', name: 'Vinho Branco Chardonnay', price: 79.00, category: 'Vinhos' },
-          { id: '34', name: 'Vinho Rosé', price: 69.50, category: 'Vinhos' },
-
-          // Drinks
-          { id: '35', name: 'Caipirinha', price: 18.00, category: 'Drinks' },
-          { id: '36', name: 'Mojito', price: 20.00, category: 'Drinks' },
-          { id: '37', name: 'Gin Tônica', price: 22.00, category: 'Drinks' },
-
-          // Doses
-          { id: '38', name: 'Whisky 12 anos', price: 25.00, category: 'Doses' },
-          { id: '39', name: 'Tequila Silver', price: 18.00, category: 'Doses' },
-          { id: '40', name: 'Vodka Importada', price: 20.00, category: 'Doses' },
         ]
       }
     },
@@ -243,7 +190,7 @@ export const useRestaurantStore = defineStore('restaurant', {
     async addPendingItemToTable(order: Order) {
       if (order) {
         order.id = `ORD-${Date.now()}-${Math.random()}`
-      
+
         console.log('Adding pending item to table:', order)
         this.pendingItems.push(order)
         this.updateTablePendingTotal()
@@ -291,9 +238,9 @@ export const useRestaurantStore = defineStore('restaurant', {
 
     async removeItemFromTable(orderItemId: string) {
       try {
-          http.request('DELETE', `company-orders/${useAuthStore().user?.company_id}/${orderItemId}`).then(() => {
-            this.selectTable(this.selectedTable?.id || '')
-          })
+        http.request('DELETE', `company-orders/${useAuthStore().user?.company_id}/${orderItemId}`).then(() => {
+          this.selectTable(this.selectedTable?.id || '')
+        })
       }
       catch (error) {
         console.error('Error removing item from table:', error)
@@ -402,6 +349,16 @@ export const useRestaurantStore = defineStore('restaurant', {
       return this.ItemsConfirmed.reduce((total, item) => {
         return total + (item.unit_price * item.quantity);
       }, 0);
+    },
+    async create_sales_record(sales: SalesRecord) {
+      try {
+        const res = await http.request('POST', `company-salesrecords/`, sales)
+        return res.data
+      } catch (error) {
+        console.error('Error creating sales record:', error)
+        throw error
+      }
+
     }
   }
 

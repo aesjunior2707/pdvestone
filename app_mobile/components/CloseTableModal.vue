@@ -125,6 +125,9 @@
 import { ref, computed } from 'vue'
 import { XIcon } from 'lucide-vue-next'
 
+import { useAuthStore } from '../stores/auth'
+import { useRestaurantStore } from '../stores/restaurant'
+
 const props = defineProps(['itemsTable'])
 const emit = defineEmits(['close', 'confirm'])
 
@@ -192,11 +195,28 @@ const handleClose = () => {
 const handleInvoiceConfirm = (invoiceData) => {
   showInvoiceModal.value = false
 
-  proceedWithClosure(invoiceData)
+  proceedWithClosure()
 }
 
-const proceedWithClosure = (invoiceData = null) => {
+const proceedWithClosure = () => {
   
-  emit('confirm', selectedPaymentMethod.value, invoiceData)
+  const json_sales_record = {
+      id : 'SLR-' + Math.random().toString(36).substr(2, 9),
+      company_id : useAuthStore().user.company_id,
+      table_id : useRestaurantStore().selectedTable.id,
+      payment_type: selectedPaymentMethod.value,
+      total_amount: finalTotal.value,
+  }
+
+  useRestaurantStore().create_sales_record(json_sales_record)
+    .then(() => {
+      emit('close')
+      emit('confirm',json_sales_record)
+    })
+    .catch(error => {
+      console.error('Error closing table:', error)
+      alert('Erro ao fechar mesa. Tente novamente.')
+    })
+ 
 }
 </script>
