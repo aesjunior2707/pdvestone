@@ -21,6 +21,7 @@ export interface Products {
   price: number
   updated_at: string
   subcategory_id?: string | null
+  subcategory_id_menu?: string | null
 }
 
 
@@ -103,6 +104,9 @@ export interface SalesRecord {
   company_id: string,
   table_id: string,
   payment_type: string,
+  itens: [],
+  user_id: string,
+  user_name: string,
   total_amount: number,
   created_at: string,
   updated_at: string
@@ -115,6 +119,7 @@ export const useRestaurantStore = defineStore('restaurant', {
     products: [] as Products[],
     pendingItems: [] as Order[],
     ItemsConfirmed: [] as Order[],
+    SalesRecords: [] as SalesRecord[],
     pendingTotal: 0,
     menuItems: [] as MenuItem[],
     closedTables: [] as ClosedTable[],
@@ -316,12 +321,16 @@ export const useRestaurantStore = defineStore('restaurant', {
       }
     },
 
-    async getProductsCategory(categoryId: string) {
+    async getProductsCategory(categoryId: string, subcategory_id: string = '') {
       try {
-        const res = await http.request('GET', `company-products/${useAuthStore().user?.company_id}/${categoryId}`)
+        console.log('Fetching products for category ID:', categoryId)
+
+        const res = await http.request('GET', !subcategory_id ? `company-products/${useAuthStore().user?.company_id}/${categoryId}` :
+          `company-products/${useAuthStore().user?.company_id}/${categoryId}?subcategory_id=${subcategory_id}`)
 
         const productsData = (res.data as { data: Products[] }).data;
 
+        console.log('Products data:', productsData)
         this.products = productsData.map(product => ({
           id: product.id,
           category_id: product.category_id,
@@ -330,8 +339,11 @@ export const useRestaurantStore = defineStore('restaurant', {
           description: product.description,
           price: product.price,
           updated_at: product.updated_at,
-          subcategory_id: product.subcategory_id || null
+          subcategory_id: product.subcategory_id || null,
+          subcategory_id_menu: product.subcategory_id_menu || null
         }));
+
+
 
         console.log('Products by category:', this.products)
         return this.products
@@ -359,6 +371,32 @@ export const useRestaurantStore = defineStore('restaurant', {
         throw error
       }
 
+    },
+    async get_sales_records(pdata_params: String = '') {
+      try {
+        const res = await http.request('GET', !pdata_params ? `company-salesrecords/${useAuthStore().user?.company_id}` :
+          `company-salesrecords/${useAuthStore().user?.company_id}?created_at=${pdata_params}`)
+
+        this.SalesRecords = []
+
+        const salesData = (res.data as { data: SalesRecord[] }).data
+
+        this.SalesRecords = salesData.map(sale => ({
+          id: sale.id,
+          company_id: sale.company_id,
+          table_id: sale.table_id,
+          payment_type: sale.payment_type,
+          itens: sale.itens,
+          user_id: sale.user_id,
+          user_name: sale.user_name,
+          total_amount: sale.total_amount,
+          created_at: sale.created_at,
+          updated_at: sale.updated_at
+        }))
+      } catch (error) {
+        console.error('Error getting sales records:', error)
+        throw error
+      }
     }
   }
 

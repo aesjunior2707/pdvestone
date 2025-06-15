@@ -58,25 +58,29 @@
 
           <!-- Product List -->
           <div class="space-y-3">
-            <button
+            <div
               v-for="product in products"
               :key="product.id"
               @click="selectProduct(product)"
-              class="w-full flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors text-left"
             >
-              <div class="flex-1">
-                <div class="font-medium text-gray-900">
-                  {{ product.description }}
+              <button
+                v-if="!product.subcategory_id || show_product_subs_cateogory"
+                class="w-full flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+              >
+                <div class="flex-1">
+                  <div class="font-medium text-gray-900">
+                    {{ product.description }}
+                  </div>
+                  <div
+                    class="text-sm text-gray-600"
+                    v-if="!product.subcategory_id_menu"
+                  >
+                    R${{ product.price.toFixed(2) }}
+                  </div>
                 </div>
-                <div
-                  class="text-sm text-gray-600"
-                  v-if="!product.subcategory_id"
-                >
-                  R${{ product.price.toFixed(2) }}
-                </div>
-              </div>
-              <ArrowRightIcon class="w-5 h-5 text-gray-400" />
-            </button>
+                <ArrowRightIcon class="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -125,21 +129,33 @@ const onClickSelectCategory = async (pcategory) => {
 };
 
 const onClickBackToCategories = () => {
+  show_product_subs_cateogory.value = false;
   category.value.selected = false;
   category.value.description = "";
   category.value.id = null;
 };
 
-const selectProduct = (product) => {
-  if (!product.subcategory_id) {
+const show_product_subs_cateogory = ref(false);
+
+const selectProduct = async (product) => {
+  if (!product.subcategory_id_menu) {
     selectedProduct.value = product;
   } else {
-    console.log("Subcategories are not supported yet.");
+    await restaurantStore
+      .getProductsCategory(product.category_id, product.subcategory_id_menu)
+      .then(() => {
+        show_product_subs_cateogory.value = true;
+      });
   }
 };
 
-const handleAddProduct = (productId,product_description, quantity, observation) => {
-  emit("add", productId,product_description ,quantity, observation);
+const handleAddProduct = (
+  productId,
+  product_description,
+  quantity,
+  observation
+) => {
+  emit("add", productId, product_description, quantity, observation);
   selectedProduct.value = null;
 };
 </script>

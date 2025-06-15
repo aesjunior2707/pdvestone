@@ -9,6 +9,7 @@ class CompanyProductsSchema(Schema):
     price = fields.Float(required=True, validate=validate.Range(min=0))  # Price must be non-negative
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    subcategory_id = fields.Str(allow_none=True, validate=validate.Length(max=255))  # Subcategory ID
    
 
 class CompanyProductsUpdateSchema(Schema):
@@ -17,6 +18,7 @@ class CompanyProductsUpdateSchema(Schema):
     category_id = fields.Str(allow_none=True, validate=validate.Length(max=255))  # Category ID
     description = fields.Str(allow_none=True, validate=validate.Length(max=255))
     price = fields.Float(allow_none=True, validate=validate.Range(min=0))  # Price must be non-negative
+    subcategory_id = fields.Str(allow_none=True, validate=validate.Length(max=255))  # Subcategory ID
 
 # Initialize schema instances
 company_product_schema = CompanyProductsSchema()

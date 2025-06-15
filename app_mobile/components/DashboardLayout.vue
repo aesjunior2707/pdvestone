@@ -5,7 +5,7 @@
       <div class="px-4 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
-            <h1 class="text-xl font-bold text-gray-900">ESTONE PDV</h1>
+            <h1 class="text-xl font-bold text-gray-900">comandaGO PDV</h1>
             <span class="text-sm text-gray-500">Bem vindo, {{ authStore.user?.name }}</span>
           </div>
           

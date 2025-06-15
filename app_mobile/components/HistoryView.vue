@@ -11,7 +11,7 @@
         </button>
         <div>
           <h2 class="text-xl font-bold text-gray-900">Histórico da Mesa</h2>
-          <p class="text-sm text-gray-600">{{ filteredTables.length }} mesas encontradas</p>
+          <p class="text-sm text-gray-600">{{ SalesRecords.length }} mesas encontradas</p>
         </div>
       </div>
     </div>
@@ -73,23 +73,23 @@
     </div>
 
     <!-- History List -->
-    <div v-if="filteredTables.length > 0" class="space-y-4">
+    <div v-if="SalesRecords.length > 0" class="space-y-4">
       <div
-        v-for="closedTable in filteredTables"
+        v-for="closedTable in SalesRecords"
         :key="closedTable.id"
         class="card"
       >
         <div class="flex items-start justify-between mb-3">
           <div>
-            <h3 class="font-medium text-gray-900">Mesa {{ closedTable.tableNumber }}</h3>
+            <h3 class="font-medium text-gray-900">Mesa {{ closedTable.table_id }}</h3>
             <p class="text-sm text-gray-600">
-              {{ formatDateTime(closedTable.closedAt) }} • {{ closedTable.waiter }}
+              {{ formatDateTime(closedTable.updated_at) }} • {{ closedTable.user_name }}
             </p>
             <p class="text-sm text-blue-600 font-medium">
-              Pagamento: {{ getPaymentMethodLabel(closedTable.paymentMethod) }}
+              Pagamento: {{ getPaymentMethodLabel(closedTable.payment_type) }}
             </p>
             <!-- Invoice Information -->
-            <div v-if="closedTable.invoice" class="text-sm text-emerald-600 font-medium mt-1">
+            <div v-if="false" class="text-sm text-emerald-600 font-medium mt-1">
               📄 NF emitida: {{ closedTable.invoice.documentType.toUpperCase() }} {{ closedTable.invoice.documentNumber }}
               <div v-if="closedTable.invoice.customerName" class="text-xs text-gray-600">
                 {{ closedTable.invoice.customerName }}
@@ -97,12 +97,12 @@
             </div>
           </div>
           <div class="text-right">
-            <div class="font-semibold text-gray-900">R${{ closedTable.finalTotal.toFixed(2) }}</div>
+            <div class="font-semibold text-gray-900">R${{ closedTable.total_amount.toFixed(2) }}</div>
             <button
               @click="reprintReceipt(closedTable)"
               class="text-sm text-emerald-600 hover:text-emerald-700 transition-colors"
             >
-              Reprint
+              Imprimir
             </button>
           </div>
         </div>
@@ -110,7 +110,7 @@
         <div class="border-t border-gray-100 pt-3">
           <div class="space-y-1">
             <div
-              v-for="group in getGroupedItems(closedTable.items)"
+              v-for="group in getGroupedItems(closedTable.itens)"
               :key="group.name"
               class="flex justify-between text-sm"
             >
@@ -121,15 +121,15 @@
             <!-- Service charge in history -->
             <div class="flex justify-between text-sm pt-2 border-t border-gray-100">
               <span class="text-gray-600">Subtotal</span>
-              <span class="text-gray-900">R${{ closedTable.total.toFixed(2) }}</span>
+              <span class="text-gray-900">R${{calculateTotalSalesAmount(closedTable.id).toFixed(2)}}</span>
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-gray-600">Taxa de serviço (10%)</span>
-              <span class="text-gray-900">R${{ closedTable.serviceCharge.toFixed(2) }}</span>
+              <span class="text-gray-900">R${{ calculateTenPercent(calculateTotalSalesAmount(closedTable.id)).toFixed(2) }}</span>
             </div>
             <div class="flex justify-between text-sm font-medium pt-1 border-t border-gray-200">
               <span class="text-gray-900">Total Final</span>
-              <span class="text-emerald-600">R${{ closedTable.finalTotal.toFixed(2) }}</span>
+              <span class="text-emerald-600">R${{ closedTable.total_amount.toFixed(2) }}</span>
             </div>
           </div>
         </div>
@@ -151,14 +151,25 @@ import { ArrowLeftIcon, ClockIcon } from 'lucide-vue-next'
 import { useRestaurantStore } from '~/stores/restaurant'
 
 const emit = defineEmits(['close'])
-const restaurantStore = useRestaurantStore()
 
 const selectedDate = ref('')
 
-// Set current date as default on mount
 onMounted(() => {
-  setToday()
+  setToday().then(() => {
+  useRestaurantStore().get_sales_records()
+  })
 })
+
+const calculateTenPercent = (value) => {
+  return value * 0.1
+}
+
+
+const calculateTotalSalesAmount = (id) => {
+  const record = SalesRecords.value.find(record => record.id === id)
+  if (!record) return 0
+  return record.itens.reduce((total, item) => total + (item.quantity * item.unit_price), 0)
+}
 
 const formatDateTime = (date) => {
   const d = new Date(date)
@@ -170,19 +181,9 @@ const formatSelectedDate = computed(() => {
   return new Date(selectedDate.value + 'T00:00:00').toLocaleDateString('pt-BR')
 })
 
-const filteredTables = computed(() => {
-  if (!selectedDate.value) {
-    return restaurantStore.closedTables
-  }
-  
-  const filterDate = new Date(selectedDate.value + 'T00:00:00')
-  const nextDay = new Date(filterDate)
-  nextDay.setDate(nextDay.getDate() + 1)
-  
-  return restaurantStore.closedTables.filter(table => {
-    const tableDate = new Date(table.closedAt)
-    return tableDate >= filterDate && tableDate < nextDay
-  })
+
+const SalesRecords = computed(() => {
+  return useRestaurantStore().SalesRecords
 })
 
 // Quick filter helpers
@@ -201,25 +202,28 @@ const isThisWeek = computed(() => {
   return !selectedDate.value
 })
 
-const setToday = () => {
+const setToday = async () => {
   const today = new Date()
   selectedDate.value = today.toISOString().split('T')[0]
 }
 
-const setYesterday = () => {
+const setYesterday = async () => {
   const yesterday = new Date()
   yesterday.setDate(yesterday.getDate() - 1)
   selectedDate.value = yesterday.toISOString().split('T')[0]
 }
 
-const setThisWeek = () => {
-  // Clear filter to show all tables from this week
+const setThisWeek = async() => {
   selectedDate.value = ''
 }
 
-const clearFilter = () => {
+const clearFilter = async() => {
   selectedDate.value = ''
 }
+
+watch(selectedDate, async (newDate) => {
+  await useRestaurantStore().get_sales_records(newDate)
+})
 
 const getPaymentMethodLabel = (method) => {
   const methods = {
@@ -235,17 +239,17 @@ const getGroupedItems = (items) => {
   const groups = new Map()
   
   items.forEach(item => {
-    const key = item.menuItem.name
+    const key = item.product_description
     if (groups.has(key)) {
       const existing = groups.get(key)
       existing.totalQuantity += item.quantity
-      existing.totalPrice += item.quantity * item.menuItem.price
+      existing.totalPrice += item.quantity * item.unit_price
     } else {
       groups.set(key, {
-        name: item.menuItem.name,
-        price: item.menuItem.price,
+        name: item.product_description,
+        price: item.unit_price,
         totalQuantity: item.quantity,
-        totalPrice: item.quantity * item.menuItem.price
+        totalPrice: item.quantity * item.unit_price
       })
     }
   })

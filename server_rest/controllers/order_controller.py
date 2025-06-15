@@ -22,7 +22,7 @@ class OrderController:
                 _request_parameter = True
                 table_number = request.args.get('table')
 
-            order = Orders.query.filter_by(company_id=company_id,table_id=table_number).all()
+            order = Orders.query.filter_by(company_id=company_id, table_id=table_number).order_by(Orders.created_at.desc()).all()
             
             if _request_parameter:
                 if not order:
@@ -192,7 +192,7 @@ class OrderController:
             }), 500
     
     @staticmethod
-    def delete_order(company_id, order_id):
+    def delete_order(company_id, order_id=None, table_id=None):
         """
         DELETE /company-orders/<company_id>/<order_id> - Delete a specific order for a company.
         
@@ -201,7 +201,11 @@ class OrderController:
         """
         try:
             # Query the table to delete
-            order = Orders.query.filter_by(company_id=company_id, id=order_id).first()
+            if order_id:
+                order = Orders.query.filter_by(company_id=company_id, id=order_id).all()
+            
+            if table_id:
+                order = Orders.query.filter_by(company_id=company_id, table_id=table_id).all()
             
             if not order:
                 return jsonify({
@@ -210,8 +214,14 @@ class OrderController:
                     'message': f'Order with ID {order_id} for company {company_id} does not exist'
                 }), 404
             
-            db.session.delete(order)
-            db.session.commit()
+            if len(order) == 1: 
+                db.session.delete(order[0])
+                db.session.commit()
+            
+            else:
+                for ord in order:
+                    db.session.delete(ord)
+                db.session.commit()
             
             return jsonify({
                 'success': True,

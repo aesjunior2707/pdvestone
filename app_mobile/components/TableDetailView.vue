@@ -276,27 +276,16 @@ const handleAddItem = async (
   }
 };
 
-const handleCloseTable = (paymentMethod, invoiceData = null) => {
-  if (table.value && authStore.user) {
-  
+const handleCloseTable = () => {
     if (pendingItems.value.length > 0) {
       alert(
         "Não é possível fechar a mesa com itens pendentes. Envie ou cancele os itens pendentes primeiro."
       );
       return;
     }
-
-    restaurantStore.closeTable(
-      table.value.id,
-      authStore.waiter.name,
-      paymentMethod,
-      invoiceData
-    );
-
     
     showCloseTableModal.value = false;
     goBack();
-  }
 };
 
 const printPartialReceipt = () => {

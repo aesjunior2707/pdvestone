@@ -16,32 +16,34 @@ class CompanyProductController:
        
         """
         try:
-            products = Products.query.filter_by(company_id=company_id,category_id=category_id).all()
+            _subcategory_id = request.args.get('subcategory_id')
             
-            if not products:
-                return jsonify({
-                    'success': True,
-                    'data': []
-                }), 200
-            
+            if _subcategory_id:
+                products = Products.query.filter_by(company_id=company_id,category_id=category_id,subcategory_id=_subcategory_id).all()
+            else:
+                products = Products.query.filter_by(company_id=company_id,category_id=category_id).all()
+               
             result = company_products_schema.dump(products)
 
-            subcagtegories = SubCategoryController.get_subcategory_company(company_id,category_id,True)
+            if not _subcategory_id:
+                subcagtegories = SubCategoryController.get_subcategory_company(company_id,category_id,True)
             
-            subcategories_json = subcagtegories[0].get_json()
-       
-            for subcategory in subcategories_json['data']:
-                result.append({
-                    'id': subcategory['id'],
-                    'company_id': subcategory['company_id'],
-                    'category_id': subcategory['category_id'],
-                    'subcategory_id': subcategory['id'],
-                    'description' : subcategory['description'],
-                    'created_at': subcategory['created_at'],
-                    'updated_at': subcategory['updated_at'],
-                    'price' : 0.0
-                })
-   
+                subcategories_json = subcagtegories[0].get_json()
+
+                print('subcategories_json',subcategories_json)
+            
+                for subcategory in subcategories_json['data']:
+                    result.append({
+                        'id': subcategory['id'],
+                        'company_id': subcategory['company_id'],
+                        'category_id': subcategory['category_id'],
+                        'subcategory_id_menu': subcategory['id'],
+                        'description' : subcategory['description'],
+                        'created_at': subcategory['created_at'],
+                        'updated_at': subcategory['updated_at'],
+                        'price' : 0.0
+                    })
+    
             return jsonify({
                 'success': True,
                 'data': result

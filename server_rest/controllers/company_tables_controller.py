@@ -127,7 +127,7 @@ class CompanyTablesController:
             }), 500
    
     @staticmethod
-    def update_company_table(company_id, table_id):
+    def update_company_table(company_id, table_id,data=None):
         """
         PUT /company-tables/<company_id>/<table_id> - Update a specific table for a company.
         

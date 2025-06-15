@@ -7,6 +7,8 @@ class CompanySalesRecordsSchema(Schema):
     table_id = fields.Str(required=True, validate=validate.Length(min=1, max=255))
     payment_type = fields.Str(allow_none=True, validate=validate.Length(max=255))
     total_amount = fields.Float(required=True, validate=validate.Range(min=0))  # Price must be non-negative
+    user_id = fields.Str(required=True, validate=validate.Length(min=1, max=255))
+    user_name = fields.Str(validate=validate.Length(min=1, max=255))
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
    
