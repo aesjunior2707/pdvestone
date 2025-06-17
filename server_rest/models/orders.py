@@ -21,6 +21,7 @@ class Orders(db.Model):
     user_name = db.Column(db.String(255), nullable=True)
     status = db.Column(db.String(50), nullable=False, default='open')
     
+    
     # Timestamps
     created_at = db.Column(db.DateTime, nullable=True, default=func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=True, default=func.current_timestamp(), onupdate=func.current_timestamp())

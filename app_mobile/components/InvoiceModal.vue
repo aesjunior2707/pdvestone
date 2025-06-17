@@ -63,49 +63,17 @@
             {{ documentType === 'cpf' ? 'Digite apenas números ou com formatação' : 'Digite apenas números ou com formatação' }}
           </p>
         </div>
-
-        <!-- Customer Name (Optional) -->
-        <div class="mb-6">
-          <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-2">
-            Nome do cliente (opcional)
-          </label>
-          <input
-            id="customer-name"
-            v-model="customerName"
-            type="text"
-            placeholder="Nome completo ou razão social"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-          />
-        </div>
-
-        <!-- Email (Optional) -->
-        <div class="mb-6">
-          <label for="customer-email" class="block text-sm font-medium text-gray-700 mb-2">
-            E-mail (opcional)
-          </label>
-          <input
-            id="customer-email"
-            v-model="customerEmail"
-            type="email"
-            placeholder="email@exemplo.com"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-          />
-          <p class="text-xs text-gray-500 mt-1">
-            A nota fiscal será enviada para este e-mail
-          </p>
-        </div>
-
         <!-- Invoice Summary -->
         <div class="mb-6 p-4 bg-gray-50 rounded-lg">
           <h4 class="font-medium text-gray-900 mb-3">Resumo da nota fiscal</h4>
           <div class="space-y-2 text-sm">
             <div class="flex justify-between">
               <span class="text-gray-600">Mesa</span>
-              <span class="text-gray-900">{{ table.number }}</span>
+              <span class="text-gray-900">{{ table.id }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Subtotal</span>
-              <span class="text-gray-900">R${{ table.total.toFixed(2) }}</span>
+              <span class="text-gray-900">R${{ Subtotal.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Taxa de serviço (10%)</span>
@@ -148,7 +116,7 @@
 import { ref, computed } from 'vue'
 import { XIcon } from 'lucide-vue-next'
 
-const props = defineProps(['table'])
+const props = defineProps(['table','Subtotal','serviceCharge','finalTotal','selectedPaymentMethod'])
 const emit = defineEmits(['close', 'confirm'])
 
 const documentType = ref('cpf')
@@ -156,14 +124,6 @@ const documentNumber = ref('')
 const customerName = ref('')
 const customerEmail = ref('')
 const validationError = ref('')
-
-const serviceCharge = computed(() => {
-  return props.table.total * 0.10
-})
-
-const finalTotal = computed(() => {
-  return props.table.total + serviceCharge.value
-})
 
 const isFormValid = computed(() => {
   return documentNumber.value.length > 0 && !validationError.value
@@ -280,25 +240,33 @@ const validateDocument = () => {
 
 const handleIssueInvoice = () => {
   if (!isFormValid.value) return
-  
-  const invoiceData = {
-    documentType: documentType.value,
-    documentNumber: documentNumber.value,
-    customerName: customerName.value,
-    customerEmail: customerEmail.value,
-    table: props.table,
-    subtotal: props.table.total,
-    serviceCharge: serviceCharge.value,
-    finalTotal: finalTotal.value,
-    issuedAt: new Date()
-  }
-  
-  // Log invoice data for demonstration
-  console.log('Issuing invoice:', invoiceData)
-  
-  // Show success message
-  alert(`Nota fiscal emitida com sucesso!\n${documentType.value.toUpperCase()}: ${documentNumber.value}${customerName.value ? '\nCliente: ' + customerName.value : ''}${customerEmail.value ? '\nE-mail: ' + customerEmail.value : ''}`)
-  
-  emit('confirm', invoiceData)
+    
+  const json_sales_record = {
+    id: "SLR-" + Math.random().toString(36).substr(2, 9),
+    company_id: useAuthStore().user.company_id,
+    table_id: useRestaurantStore().selectedTable.id,
+    payment_type: props.selectedPaymentMethod,
+    total_amount: props.finalTotal,
+    user_id: useAuthStore().user.id,
+    user_name: useAuthStore().user.name,
+    issues_invoice : true,
+    type_customer : documentType.value,
+    identification_nfce : documentNumber.value
+  };
+
+  useRestaurantStore()
+    .create_sales_record(json_sales_record)
+    .then(() => {
+      useRestaurantStore()
+        .initializeTables()
+        .then(() => {
+          emit("close");
+          emit("confirm");
+        });
+    })
+    .catch((error) => {
+      console.error("Error closing table:", error);
+      alert("Erro ao fechar mesa. Tente novamente.");
+    });
 }
 </script>

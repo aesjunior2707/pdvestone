@@ -10,7 +10,7 @@
         </div>
       </div>
       <div class="flex-1 min-w-0">
-        <h3 class="text-sm font-medium text-gray-900">Instalar ESTONE PDV</h3>
+        <h3 class="text-sm font-medium text-gray-900">Instalar COMAN PDV</h3>
         <p class="text-sm text-gray-600 mt-1">
           Adicione o app à sua tela inicial para acesso rápido e melhor experiência.
         </p>

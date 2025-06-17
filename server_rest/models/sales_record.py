@@ -16,7 +16,9 @@ class SalesRecord(db.Model):
     total_amount = db.Column(db.Float, nullable=False)
     user_id = db.Column(db.String(255), nullable=False)
     user_name = db.Column(db.String(255), nullable=True)
-    
+    identification_nfce = db.Column(db.String(255), nullable=True)
+    type_customer = db.Column(db.String(255), nullable=True)    
+    issues_invoice = db.Column(db.Boolean, nullable=True, default=False)
     # Timestamps
     created_at = db.Column(db.DateTime, nullable=True, default=func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=True, default=func.current_timestamp(), onupdate=func.current_timestamp())
@@ -26,7 +28,8 @@ class SalesRecord(db.Model):
         db.UniqueConstraint('id', name='sales_records_pkey'),
     )
     
-    def __init__(self, id, company_id,table_id, payment_type,total_amount=0.0, user_id=None, user_name=None):
+    def __init__(self, id, company_id,table_id, payment_type,total_amount=0.0, user_id=None, user_name=None,
+                 type_customer=None,identification_nfce=None,issues_invoice=False):
 
         self.id = id
         self.company_id = company_id
@@ -35,6 +38,9 @@ class SalesRecord(db.Model):
         self.total_amount = total_amount
         self.user_id = user_id
         self.user_name = user_name
+        self.identification_nfce = identification_nfce
+        self.type_customer = type_customer
+        self.issues_invoice = issues_invoice
   
     def to_dict(self):
         """Convert Products instance to dictionary."""
@@ -46,6 +52,9 @@ class SalesRecord(db.Model):
             'total_amount' : self.total_amount,
             'user_id': self.user_id,
             'user_name': self.user_name,
+            'identification_nfce': self.identification_nfce,
+            'type_customer': self.type_customer,
+            'issues_invoice' : self.issues_invoice,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
         }

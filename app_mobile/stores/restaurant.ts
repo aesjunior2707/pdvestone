@@ -108,6 +108,9 @@ export interface SalesRecord {
   user_id: string,
   user_name: string,
   total_amount: number,
+  type_customer : string,
+  identification_nfce: string,
+  issues_invoice : boolean,
   created_at: string,
   updated_at: string
 }
@@ -390,6 +393,9 @@ export const useRestaurantStore = defineStore('restaurant', {
           user_id: sale.user_id,
           user_name: sale.user_name,
           total_amount: sale.total_amount,
+          type_customer: sale.type_customer,
+          identification_nfce: sale.identification_nfce,
+          issues_invoice: sale.issues_invoice,
           created_at: sale.created_at,
           updated_at: sale.updated_at
         }))

@@ -89,9 +89,9 @@
               Pagamento: {{ getPaymentMethodLabel(closedTable.payment_type) }}
             </p>
             <!-- Invoice Information -->
-            <div v-if="false" class="text-sm text-emerald-600 font-medium mt-1">
-              📄 NF emitida: {{ closedTable.invoice.documentType.toUpperCase() }} {{ closedTable.invoice.documentNumber }}
-              <div v-if="closedTable.invoice.customerName" class="text-xs text-gray-600">
+            <div v-if="closedTable.issues_invoice" class="text-sm text-emerald-600 font-medium mt-1">
+              📄 NF emitida: {{ closedTable.type_customer.toUpperCase() }} {{ closedTable.identification_nfce }}
+              <div v-if="false" class="text-xs text-gray-600">
                 {{ closedTable.invoice.customerName }}
               </div>
             </div>
@@ -156,7 +156,7 @@ const selectedDate = ref('')
 
 onMounted(() => {
   setToday().then(() => {
-  useRestaurantStore().get_sales_records()
+  useRestaurantStore().get_sales_records(selectedDate.value)
   })
 })
 

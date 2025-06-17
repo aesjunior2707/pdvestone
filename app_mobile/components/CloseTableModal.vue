@@ -139,7 +139,11 @@
     <!-- Invoice Modal -->
     <InvoiceModal
       v-if="showInvoiceModal"
-      :table="table"
+      :table="restauranteStore.selectedTable"
+      :Subtotal="total_price"
+      :serviceCharge="serviceCharge"
+      :finalTotal="finalTotal"
+      :selectedPaymentMethod="selectedPaymentMethod"
       @close="showInvoiceModal = false"
       @confirm="handleInvoiceConfirm"
     />
@@ -152,6 +156,9 @@ import { XIcon } from "lucide-vue-next";
 
 import { useAuthStore } from "../stores/auth";
 import { useRestaurantStore } from "../stores/restaurant";
+
+
+const restauranteStore = useRestaurantStore();
 
 const props = defineProps(["itemsTable"]);
 const emit = defineEmits(["close", "confirm"]);
@@ -232,6 +239,9 @@ const proceedWithClosure = () => {
     total_amount: finalTotal.value,
     user_id: useAuthStore().user.id,
     user_name: useAuthStore().user.name,
+    issues_invoice :  false,
+    identification_nfce :  null,
+    type_customer : null,
   };
 
   useRestaurantStore()

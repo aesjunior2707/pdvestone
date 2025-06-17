@@ -15,7 +15,7 @@ class CompanyTablesController:
        
         """
         try:
-            tables = Tables.query.filter_by(company_id=company_id).all()
+            tables = Tables.query.filter_by(company_id=company_id).order_by(Tables.id.desc()).all()
             
             if not tables:
                 return jsonify({

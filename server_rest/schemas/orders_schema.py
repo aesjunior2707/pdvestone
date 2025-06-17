@@ -28,7 +28,7 @@ class OrdersUpdateSchema(Schema):
     quantity = fields.Int(allow_none=True, validate=validate.Range(min=1))
     note = fields.Str(allow_none=True, validate=validate.Length(max=255))
     status = fields.Str(allow_none=True, validate=validate.OneOf(['open', 'peding', 'closed']))
-
+    
 # Initialize schema instances
 order_schema = OrdersSchema()
 orders_schema = OrdersSchema(many=True)

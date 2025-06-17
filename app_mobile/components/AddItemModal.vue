@@ -152,10 +152,17 @@ const selectProduct = async (product) => {
 const handleAddProduct = (
   productId,
   product_description,
+  price,
   quantity,
   observation
 ) => {
-  emit("add", productId, product_description, quantity, observation);
+  console.log("Adding product:", {
+    productId,
+    product_description,
+    quantity,
+    observation,
+  });
+  emit("add", productId, product_description, price,quantity, observation);
   selectedProduct.value = null;
 };
 </script>
