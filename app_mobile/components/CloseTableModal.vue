@@ -224,10 +224,20 @@ const handleClose = () => {
   proceedWithClosure();
 };
 
-const handleInvoiceConfirm = (invoiceData) => {
-  showInvoiceModal.value = false;
-
-  proceedWithClosure();
+const handleInvoiceConfirm = (emissao) => {
+  if (!emissao) {
+     proceedWithClosure();
+     showInvoiceModal.value = false;
+  }
+  else {
+    useRestaurantStore()
+        .initializeTables()
+        .then(() => {
+          emit("close");
+          emit("confirm");
+          showInvoiceModal.value = false;
+        });
+  }
 };
 
 const proceedWithClosure = () => {

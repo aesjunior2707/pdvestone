@@ -261,7 +261,7 @@ const handleIssueInvoice = () => {
         .initializeTables()
         .then(() => {
           emit("close");
-          emit("confirm");
+          emit("confirm",true);
         });
     })
     .catch((error) => {

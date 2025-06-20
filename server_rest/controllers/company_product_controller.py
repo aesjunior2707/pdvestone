@@ -10,6 +10,41 @@ class CompanyProductController:
     """Controller class for handling company-related HTTP requests."""
     
     @staticmethod
+    def get_all_products_company(company_id):
+        try:
+            """
+            GET /company-products/<company_id> - Retrieve all products by Company Id.
+           
+            """
+            products = Products.query.filter_by(company_id=company_id).all()
+            
+            if not products:
+                return jsonify({
+                    'success': True,
+                    'data': []
+                }), 200
+            
+            result = company_products_schema.dump(products)
+            
+            return jsonify({
+                'success': True,
+                'data': result
+            }), 200
+        
+        except SQLAlchemyError as e:
+            return jsonify({
+                'success': False,
+                'error': 'Database error occurred',
+                'message': str(e)
+            }), 500
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': 'Internal server error',
+                'message': str(e)
+            }), 500
+
+
     def get_products_company(company_id,category_id):
         """
         GET /company-products/<company_id>/<category_id> - Retrieve a specific list products by Company Id.

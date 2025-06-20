@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from marshmallow import ValidationError
 from config.database import db
 from models.users import Users
-
+from controllers.company_controller import CompanyController
 
 class AuthController:
     """Controller class for handling auth-related HTTP requests."""
@@ -48,12 +48,19 @@ class AuthController:
             # Generate authentication token (if applicable)
             # token = generate_auth_token(user)  # Replace with your token generation logic
             
+            company_content = CompanyController.get_company(user.company_id)  # Ensure the company exists
+            company_content = company_content[0].get_json()   
+            print(f"company_content: {company_content}")
+
+
+
             return jsonify({
                 'success': True,
                 'message': 'Login successful',
                 'name_user' : user.name,
                 'company_id': user.company_id,
                 'id': user.id,
+                'restaurant' : company_content['data'],
                 # 'token': token  # Include token if applicable
             }), 200
             
