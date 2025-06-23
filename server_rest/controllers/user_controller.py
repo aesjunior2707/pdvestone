@@ -9,6 +9,42 @@ class UsersController:
     """Controller class for handling company-related HTTP requests."""
     
     @staticmethod
+    def get_users_company(company_id):
+        try:
+            """
+                GET /users/<company_id> - Retrieve all users or filter by query parameters.
+                
+                Returns:
+                    JSON response with list of companies and HTTP status code.
+            """            
+             
+            users = Users.query.filter_by(company_id=company_id).all()
+
+            if not users:
+                return jsonify({
+                    'success': True,
+                    'data': []
+                }), 200
+            result = users_schema.dump(users)
+            
+            return jsonify({
+                'success': True,
+                'data': result
+            }), 200
+        except SQLAlchemyError as e:
+            return jsonify({
+                'success': False,
+                'error': 'Database error occurred',
+                'message': str(e)
+            }), 500
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': 'Internal server error',
+                'message': str(e)
+            }), 500
+        
+    @staticmethod
     def get_users():
         """
         GET /users - Retrieve all users or filter by query parameters.
