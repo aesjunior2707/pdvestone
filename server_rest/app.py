@@ -9,6 +9,8 @@ from routes.company_products_routes import company_products_bp
 from routes.subcategory_routes import subcategory_bp
 from routes.orders_routes import orders_bp
 from routes.sales_records_routes import sales_records_bp
+from routes.print_partial import print_bp
+from routes.dashboards_routes import dash_bp
 
 def create_application():
     """Create and configure the main Flask application."""
@@ -23,8 +25,10 @@ def create_application():
     app.register_blueprint(company_products_bp)
     app.register_blueprint(subcategory_bp)
     app.register_blueprint(orders_bp)
-    app.register_blueprint(sales_records_bp)    
-    
+    app.register_blueprint(sales_records_bp)   
+    app.register_blueprint(print_bp) 
+    app.register_blueprint(dash_bp)
+
     # Health check endpoint
     @app.route('/health', methods=['GET'])
     def health_check():
@@ -79,6 +83,8 @@ def create_application():
 
 # Create application instance
 app = create_application()
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8080)

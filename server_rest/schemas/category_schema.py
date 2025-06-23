@@ -8,12 +8,14 @@ class CategorySchema(Schema):
     description = fields.Str(allow_none=True, validate=validate.Length(max=255))
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    printer_id = fields.Str(allow_none=True, validate=validate.Length(max=255))
 
 
 class CategoryUpdateSchema(Schema):
     """Schema for category update operations (id not required)."""
     
     description = fields.Str(allow_none=True, validate=validate.Length(max=255))
+    printer_id = fields.Str(allow_none=True, validate=validate.Length(max=255))
 
 # Initialize schema instances
 category_schema = CategorySchema()

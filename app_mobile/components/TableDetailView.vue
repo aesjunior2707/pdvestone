@@ -290,24 +290,14 @@ const handleCloseTable = () => {
 
 const printPartialReceipt = () => {
   if (table.value) {
-    const groupedItems = getGroupedItems(table.value.items);
-    const serviceCharge = table.value.total * 0.1;
-    const finalTotal = table.value.total + serviceCharge;
+    const content = {
+      'table_id': table.value.id,
+      'company_id': useAuthStore().user.company_id,
+    }
 
-    console.log("Printing partial receipt for Table", table.value.number, {
-      items: groupedItems,
-      subtotal: table.value.total,
-      serviceCharge: serviceCharge,
-      finalTotal: finalTotal,
-      date: new Date(),
-      waiter: authStore.waiter?.name,
-      type: "PARTIAL",
+    restaurantStore.printPartialReceipt(content).catch((error) => {
+      console.error('Erro ao imprimir recibo parcial:', error);
     });
-
-    // Show feedback to user
-    alert(
-      `Recibo parcial da Mesa ${table.value.number} enviado para impressora`
-    );
   }
 };
 

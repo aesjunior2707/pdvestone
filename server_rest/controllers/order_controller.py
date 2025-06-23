@@ -4,7 +4,8 @@ from marshmallow import ValidationError
 from models.orders import Orders
 from schemas.orders_schema import order_schema,orders_schema, order_update_schema
 from config.database import db
-
+from controllers.mqtt_controller import MQTTController
+import json
 class OrderController:
     """Controller class for handling company-related HTTP requests."""
     
@@ -22,7 +23,10 @@ class OrderController:
                 _request_parameter = True
                 table_number = request.args.get('table')
 
-            order = Orders.query.filter_by(company_id=company_id, table_id=table_number).order_by(Orders.created_at.desc()).all()
+            if table_number:
+                order = Orders.query.filter_by(company_id=company_id, table_id=table_number).order_by(Orders.created_at.desc()).all()
+            else:
+                order = Orders.query.filter_by(company_id=company_id).order_by(Orders.created_at.desc()).all()
             
             if _request_parameter:
                 if not order:
@@ -30,8 +34,11 @@ class OrderController:
                         'success': True,
                         'data': []
                     }), 200
-                
+            
+            print(f"Order: {type(order)}")
+           
             result = orders_schema.dump(order)
+           
 
             if _request_parameter:
                 return jsonify({
@@ -84,9 +91,19 @@ class OrderController:
             # Add to session and commit
             db.session.bulk_save_objects(new_orders)
             db.session.commit()
-            
+
             result = orders_schema.dump(new_orders, many=True)
             
+            send_content = {
+                'action' :  'order',
+                'itens' : result
+            }
+
+            _send_orders = MQTTController('B906')
+            _send_orders.connect()
+            _send_orders.publish('go/B906/print', json.dumps(send_content))
+            _send_orders.disconnect()
+
             return jsonify({
                 'success': True,
                 'data': result

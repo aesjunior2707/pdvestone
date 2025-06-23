@@ -117,6 +117,8 @@ class SalesRecordsController:
             
             result = company_sales_record_schema.dump(new_sale_records)
             
+            print(f"New Sales Record created: {result}")
+            
             return jsonify({
                 'success': True,
                 'data': result

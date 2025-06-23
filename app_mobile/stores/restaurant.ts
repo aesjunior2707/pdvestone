@@ -403,6 +403,9 @@ export const useRestaurantStore = defineStore('restaurant', {
         console.error('Error getting sales records:', error)
         throw error
       }
+    },
+    async printPartialReceipt(content : any) {
+      await http.request('POST', `print-partial/`, content)
     }
   }
 

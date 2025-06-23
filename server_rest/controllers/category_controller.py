@@ -17,6 +17,7 @@ class CategoryController:
         try:
             category = Category.query.filter_by(company_id=company_id).all()
             
+            
             if not category:
                 return jsonify({
                     'success': True,

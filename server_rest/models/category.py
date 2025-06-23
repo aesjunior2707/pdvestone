@@ -13,6 +13,7 @@ class Category(db.Model):
     
     # Category information
     description = db.Column(db.String(255), nullable=False)
+    printer_id = db.Column(db.String(255), nullable=True)
     
     # Timestamps
     created_at = db.Column(db.DateTime, nullable=True, default=func.current_timestamp())
@@ -23,12 +24,12 @@ class Category(db.Model):
         db.UniqueConstraint('id', name='categories_pkey'),
     )
     
-    def __init__(self, id, company_id,description):
+    def __init__(self, id, company_id,description,printer_id):
         """Initialize a new Company instance."""
         self.id = id
         self.company_id = company_id
         self.description = description
-
+        self.printer_id = printer_id
   
     def to_dict(self):
         """Convert company instance to dictionary."""
@@ -36,6 +37,7 @@ class Category(db.Model):
             'id': self.id,
             'company_id': self.company_id,
             'description': self.description,
+            'printer_id' : self.printer_id,
            
         }
     
