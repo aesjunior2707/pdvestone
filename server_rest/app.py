@@ -11,6 +11,7 @@ from routes.orders_routes import orders_bp
 from routes.sales_records_routes import sales_records_bp
 from routes.print_partial import print_bp
 from routes.dashboards_routes import dash_bp
+from routes.printers_routes import printers_bp
 
 def create_application():
     """Create and configure the main Flask application."""
@@ -28,6 +29,7 @@ def create_application():
     app.register_blueprint(sales_records_bp)   
     app.register_blueprint(print_bp) 
     app.register_blueprint(dash_bp)
+    app.register_blueprint(printers_bp)
 
     # Health check endpoint
     @app.route('/health', methods=['GET'])
