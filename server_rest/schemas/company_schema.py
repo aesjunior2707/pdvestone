@@ -12,6 +12,7 @@ class CompanySchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
     tax_id = fields.Str(required=True, validate=validate.Length(min=1, max=20))
+    address = fields.Str(allow_none=True, validate=validate.Length(max=255))
 
 class CompanyUpdateSchema(Schema):
     """Schema for company update operations (id not required)."""
@@ -22,6 +23,7 @@ class CompanyUpdateSchema(Schema):
     contact_email = fields.Email(allow_none=True, validate=validate.Length(max=255))
     responsible_person = fields.Str(allow_none=True, validate=validate.Length(max=255))
     tax_id = fields.Str(validate=validate.Length(min=1, max=20))
+    address = fields.Str(allow_none=True, validate=validate.Length(max=255))
 
 # Initialize schema instances
 company_schema = CompanySchema()

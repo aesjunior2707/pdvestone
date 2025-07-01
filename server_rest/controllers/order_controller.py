@@ -35,8 +35,6 @@ class OrderController:
                         'data': []
                     }), 200
             
-            print(f"Order: {type(order)}")
-           
             result = orders_schema.dump(order)
            
 

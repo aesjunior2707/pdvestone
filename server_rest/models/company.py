@@ -17,7 +17,7 @@ class Company(db.Model):
     contact_email = db.Column(db.String(255), nullable=True)
     responsible_person = db.Column(db.String(255), nullable=True)
     tax_id = db.Column(db.String(20), nullable=True, unique=True)
-    
+    address = db.Column(db.String(255), nullable=True)
     # Timestamps
     created_at = db.Column(db.DateTime, nullable=True, default=func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=True, default=func.current_timestamp(), onupdate=func.current_timestamp())
@@ -28,7 +28,7 @@ class Company(db.Model):
     )
     
     def __init__(self, id, legal_name,tax_id,trade_name=None, contact_phone=None, 
-                 contact_email=None, responsible_person=None):
+                 contact_email=None, responsible_person=None,address=None):
         """Initialize a new Company instance."""
         self.id = id
         self.legal_name = legal_name
@@ -37,6 +37,7 @@ class Company(db.Model):
         self.contact_email = contact_email
         self.responsible_person = responsible_person
         self.tax_id = tax_id
+        self.address = address
 
     
     def to_dict(self):
@@ -50,7 +51,8 @@ class Company(db.Model):
             'responsible_person': self.responsible_person,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
-            'tax_id': self.tax_id
+            'tax_id': self.tax_id,
+            'address': self.address
         }
     
     def update_from_dict(self, data):

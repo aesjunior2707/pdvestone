@@ -16,7 +16,7 @@ class CompanyProductController:
             GET /company-products/<company_id> - Retrieve all products by Company Id.
            
             """
-            products = Products.query.filter_by(company_id=company_id).all()
+            products = Products.query.filter_by(company_id=company_id).order_by(Products.created_at.desc()).all()
             
             if not products:
                 return jsonify({
