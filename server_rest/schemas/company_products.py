@@ -10,6 +10,15 @@ class CompanyProductsSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
     subcategory_id = fields.Str(allow_none=True, validate=validate.Length(max=255))  # Subcategory ID
+    unit = fields.Str(missing="UN")
+    ncm = fields.Str()
+    cest = fields.Str()
+    cfop = fields.Str()
+    csosn = fields.Str()
+    origin = fields.Str()
+    cst_pis = fields.Str()
+    cst_cofins = fields.Str()
+
    
 
 class CompanyProductsUpdateSchema(Schema):
@@ -19,6 +28,14 @@ class CompanyProductsUpdateSchema(Schema):
     description = fields.Str(allow_none=True, validate=validate.Length(max=255))
     price = fields.Float(allow_none=True, validate=validate.Range(min=0))  # Price must be non-negative
     subcategory_id = fields.Str(allow_none=True, validate=validate.Length(max=255))  # Subcategory ID
+    unit = fields.Str()
+    ncm = fields.Str()
+    cest = fields.Str()
+    cfop = fields.Str()
+    csosn = fields.Str()
+    origin = fields.Str()
+    cst_pis = fields.Str()
+    cst_cofins = fields.Str()
 
 # Initialize schema instances
 company_product_schema = CompanyProductsSchema()

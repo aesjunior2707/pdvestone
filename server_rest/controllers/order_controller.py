@@ -257,3 +257,29 @@ class OrderController:
                 'error': 'Internal server error',
                 'message': str(e)
             }), 500
+            
+    @staticmethod
+    def delete_all_orders_table(company_id,table_id):
+        try:
+            OrderController.delete_order(company_id, order_id=None,table_id=table_id)
+
+            return jsonify({
+                'success': True,
+                'message': 'All orders for the table deleted successfully'
+            }), 200
+        
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return jsonify({
+                'success': False,
+                'error': 'Database error occurred',
+                'message': str(e)
+            }), 500
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({
+                'success': False,
+                'error': 'Internal server error',
+                'message': str(e)
+            }), 500
+        

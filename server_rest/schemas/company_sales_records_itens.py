@@ -13,6 +13,14 @@ class CompanySalesItensRecordsSchema(Schema):
     total_price = fields.Float(required=True, validate=validate.Range(min=0))
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    unit = fields.Str()
+    ncm = fields.Str()
+    cest = fields.Str()
+    cfop = fields.Str()
+    csosn = fields.Str()
+    origin = fields.Str()
+    cst_pis = fields.Str()
+    cst_cofins = fields.Str()
    
 # Initialize schema instances
 company_sales_record_schema_itens = CompanySalesItensRecordsSchema()

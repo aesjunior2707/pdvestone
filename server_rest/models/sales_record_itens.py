@@ -16,6 +16,14 @@ class SalesRecordItens(db.Model):
     unit_price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Float, nullable=False)
     total_price = db.Column(db.Float, nullable=False)
+    unit = db.Column(db.String(255), nullable=False)
+    ncm = db.Column(db.String(255), nullable=False)
+    cest = db.Column(db.String(255), nullable=False)
+    cfop = db.Column(db.String(255), nullable=False)
+    csosn = db.Column(db.String(255), nullable=False)
+    origin = db.Column(db.String(255), nullable=False)
+    cst_pis = db.Column(db.String(255), nullable=False)
+    cst_cofins = db.Column(db.String(255), nullable=False)
         
     # Timestamps
     created_at = db.Column(db.DateTime, nullable=True, default=func.current_timestamp())
@@ -26,7 +34,8 @@ class SalesRecordItens(db.Model):
         db.UniqueConstraint('id', name='sales_record_items_pkey'),
     )
     
-    def __init__(self, id, company_id,table_id, sales_record_id, product_id,product_description,unit_price, quantity, total_price=0.0):
+    def __init__(self, id, company_id,table_id, sales_record_id, product_id,product_description,unit_price, quantity, 
+                 total_price=0.0,unit=None,ncm=None,cest=None,cfop=None,csosn=None,origin=None,cst_pis=None,cst_cofins=None):
         self.id = id
         self.company_id = company_id
         self.table_id = table_id
@@ -36,6 +45,14 @@ class SalesRecordItens(db.Model):
         self.unit_price = unit_price
         self.quantity = quantity
         self.total_price = total_price
+        self.unit = unit
+        self.ncm = ncm
+        self.cest = cest
+        self.cfop = cfop
+        self.csosn = csosn
+        self.origin = origin
+        self.cst_pis = cst_pis
+        self.cst_cofins = cst_cofins
 
   
     def to_dict(self):
@@ -51,6 +68,14 @@ class SalesRecordItens(db.Model):
             'total_price': self.total_price,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'unit' : self.unit,
+            'ncm' : self.ncm,
+            'cest' : self.cest,
+            'cfop' : self.cfop,
+            'csosn' : self.csosn,
+            'origin' : self.origin,
+            'cst_pis' : self.cst_pis,
+            'cst_cofins' : self.cst_cofins
         }
     
     def update_from_dict(self, data):

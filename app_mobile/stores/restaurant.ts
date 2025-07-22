@@ -222,6 +222,7 @@ export const useRestaurantStore = defineStore('restaurant', {
 
     async sendPendingItems() {
       try {
+        console.log('sendPendingItems',this.pendingItems)
         await http.request('POST', `company-orders/`, this.pendingItems)
         this.pendingItems = []
         this.pendingTotal = 0

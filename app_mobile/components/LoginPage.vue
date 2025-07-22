@@ -2,7 +2,7 @@
   <div class="min-h-screen flex items-center justify-center px-4">
     <div class="card max-w-md w-full">
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">ESTONE PDV</h1>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">comandaGO PDV</h1>
         <p class="text-sm text-gray-600">Sistema de Ponto de Venda</p>
       </div>
       

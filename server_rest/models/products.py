@@ -16,6 +16,15 @@ class Products(db.Model):
     # Products information
     description = db.Column(db.String(255), nullable=False)
     price = db.Column(db.Float, nullable=False)
+    unit = db.Column(db.String(255), nullable=False)
+    ncm = db.Column(db.String(255), nullable=False)
+    cest = db.Column(db.String(255), nullable=False)
+    cfop = db.Column(db.String(255), nullable=False)
+    csosn = db.Column(db.String(255), nullable=False)
+    origin = db.Column(db.String(255), nullable=False)
+    cst_pis = db.Column(db.String(255), nullable=False)
+    cst_cofins = db.Column(db.String(255), nullable=False)
+    
     # Timestamps
     created_at = db.Column(db.DateTime, nullable=True, default=func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=True, default=func.current_timestamp(), onupdate=func.current_timestamp())
@@ -25,7 +34,8 @@ class Products(db.Model):
         db.UniqueConstraint('id', name='company_products_pkey'),
     )
     
-    def __init__(self, id, company_id,category_id, description,price=0.0, subcategory_id=None):
+    def __init__(self, id, company_id,category_id, description,price=0.0, subcategory_id=None,unit=None,
+                ncm=None,cest=None,cfop=None,csosn=None,origin=None,cst_pis=None,cst_cofins=None):
         """Initialize a new Company instance."""
         self.id = id
         self.company_id = company_id
@@ -33,6 +43,14 @@ class Products(db.Model):
         self.description = description
         self.price = price
         self.subcategory_id = subcategory_id
+        self.unit = unit
+        self.ncm = ncm
+        self.cest = cest
+        self.cfop = cfop
+        self.csosn = csosn
+        self.origin = origin
+        self.cst_pis = cst_pis
+        self.cst_cofins = cst_cofins
   
     def to_dict(self):
         """Convert Products instance to dictionary."""
@@ -44,7 +62,15 @@ class Products(db.Model):
             'price': self.price,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
-            'subcategory_id': self.subcategory_id
+            'subcategory_id': self.subcategory_id,
+            'unit' : self.unit,
+            'ncm' : self.ncm,
+            'cest' : self.cest,
+            'cfop' : self.cfop,
+            'csosn' : self.csosn,
+            'origin' : self.origin,
+            'cst_pis' : self.cst_pis,
+            'cst_cofins' : self.cst_cofins
         }
     
     def update_from_dict(self, data):

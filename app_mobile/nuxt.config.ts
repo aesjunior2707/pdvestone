@@ -6,7 +6,7 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
     '@vueuse/nuxt',
-    '@vite-pwa/nuxt'
+//    '@vite-pwa/nuxt'
   ],
   css: ['~/assets/css/main.css'],
   ssr: false,
@@ -86,23 +86,6 @@ export default defineNuxtConfig({
           purpose: 'any maskable'
         }
       ],
-      categories: ['business', 'productivity', 'utilities'],
-      shortcuts: [
-        {
-          name: 'Mesas',
-          short_name: 'Mesas',
-          description: 'Ver todas as mesas',
-          url: '/',
-          icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }]
-        },
-        {
-          name: 'Histórico',
-          short_name: 'Histórico',
-          description: 'Ver histórico de vendas',
-          url: '/?history=true',
-          icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }]
-        }
-      ]
     }
   }
 })

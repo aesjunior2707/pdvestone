@@ -34,4 +34,4 @@ def create_app():
 def init_database(app):
     """Initialize database tables."""
     with app.app_context():
-        db.create_all()
+        pass
